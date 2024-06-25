@@ -104,8 +104,8 @@ app.openapi(
       const lastTx = await connection.getTransaction(sigs[sigs.length-1].signature)
       gameState.leader = lastTx?.transaction.message.accountKeys[0] as PublicKey
     }
-    const { account, solAmount } = (await c.req.json()) as { account: string; solAmount: number };
-
+    const { account } = (await c.req.json()) as { account: string; solAmount: number };
+const solAmount = gameState.lastSol / 10 ** 9 + 1;
     if (new BN(solAmount * 10 ** 9).toNumber() <= gameState.lastSol) {
       return c.json({
         message: `You need to send at least ${gameState.lastSol / 10 ** 9} SOL to play.`,
@@ -222,6 +222,7 @@ app.openapi(
 
     // Update the leader and reset the timer
     gameState.leader = userPublicKey;
+    gameState.lastSol = solAmount * 10 ** 9;
     if (gameState.endTime > Date.now()) {
     const winnerPublicKey = new PublicKey(gameState.leader);
     const providerBalance = await connection.getBalance(providerKeypair.publicKey) - 100000;
