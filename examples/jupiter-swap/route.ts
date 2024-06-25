@@ -673,6 +673,7 @@ const idl = {
   }
 }
 import 'chartjs-adapter-date-fns'; // Import the date adapter
+import path from 'path';
 
 // Connection and program setup
 const connection = new Connection(process.env.NEXT_PUBLIC_RPC_URL as string);
@@ -785,11 +786,19 @@ app.openapi(
         { input: image2, left: width, top: 0 }
       ])
       .toBuffer();
+      
+    // Ensure the public directory exists
+    const publicDir = path.join(__dirname, '..', 'public');
+    if (!fs.existsSync(publicDir)) {
+      fs.mkdirSync(publicDir);
+    }
 
-    require('fs').writeFileSync(`/public/${dt}-candlestick-chart-combined.png`, combinedImage);
+    // Save the file to the public directory
+    const filePath = path.join(publicDir, `${dt}-candlestick-chart-combined.png`);
+    fs.writeFileSync(filePath, combinedImage);
 
     const response: ActionsSpecGetResponse = {
-      icon: `https://share.pumpwithfriens.fun/${dt}-candlestick-chart-combined.png`,
+      icon: `https://stacc-actions2-7ff4c9084f2e.herokuapp.com/public/${dt}-candlestick-chart-combined.png`,
       label: `Swap ${kothCoin.name} or ${latestCoin.name}`,
       title: `Swap ${kothCoin.name} or ${latestCoin.name}`,
       description: `Swap ${kothCoin.name} or ${latestCoin.name} with SOL. Choose a SOL amount of either from the options below, or enter a custom amount.`,
@@ -850,7 +859,7 @@ app.openapi(
     return c.json(response);
   },
 );
-
+import fs from 'fs'
 app.openapi(
   createRoute({
     method: 'get',
@@ -869,10 +878,19 @@ app.openapi(
     const dt = new Date().getTime();
     const image1 = await generateCandlestickChart(mint);
 
-    require('fs').writeFileSync(`/public/${dt}-candlestick-chart-combined.png`, image1);
+    // Ensure the public directory exists
+    const publicDir = path.join(__dirname, '..', 'public');
+    if (!fs.existsSync(publicDir)) {
+      fs.mkdirSync(publicDir);
+    }
+
+    // Save the file to the public directory
+    const filePath = path.join(publicDir, `${dt}-candlestick-chart-combined.png`);
+    fs.writeFileSync(filePath, image1);
+
     const coin = await(await fetch("https://frontend-api.pump.fun/coins/"+mint)).json()
     const response: ActionsSpecGetResponse = {
-      icon: `https://share.pumpwithfriens.fun/${dt}-candlestick-chart-combined.png`,
+      icon: `https://stacc-actions2-7ff4c9084f2e.herokuapp.com/public/${dt}-candlestick-chart-combined.png`,
       label: `Swap ${coin.name}`,
       title: `Swap ${coin.name}`,
       description: `Swap ${coin.name} with SOL. Choose a SOL amount of either from the options below, or enter a custom amount.`,
