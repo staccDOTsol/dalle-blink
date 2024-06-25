@@ -6,7 +6,7 @@ import { ComputeBudgetProgram, Connection, Keypair, PublicKey, SystemProgram, SY
 import { getAssociatedTokenAddressSync, TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import { base64, bs58 } from '@coral-xyz/anchor/dist/cjs/utils/bytes';
 import { ChartJSNodeCanvas } from 'chartjs-node-canvas';
-import { ChartType } from 'chart.js';
+import { ChartConfiguration, ChartType } from 'chart.js';
 const fetch = require('node-fetch');
 const sharp = require('sharp');
 import FormData from 'form-data';
@@ -731,42 +731,51 @@ const getCandlestickData = async (mint: string) => {
 const width = 800;
 const height = 600;
 const chartJSNodeCanvas = new ChartJSNodeCanvas({ width, height });
-
 const generateCandlestickChart = async (mint: any, candlestickData: any) => {
-
-
-  const labels = candlestickData.map((item: any) => new Date(item.timestamp * 1000).toLocaleDateString());
+  const labels = candlestickData.map((item: any, index: number) => index + 1);
   const data = candlestickData.map((item: any) => ({
-    x: new Date(item.timestamp * 1000),
+    x: labels.shift(), // Use the sequential label
     o: item.open,
     h: item.high,
     l: item.low,
     c: item.close,
   }));
 
-  const configuration = {
+  const configuration: ChartConfiguration<'line'> = {
+
     type: 'line',
-  data: {
-    labels: labels,
-    datasets: [{
-      label: 'Candlestick Data',
-      data: data.map(item => item.c),
-      borderColor: 'rgba(75, 192, 192, 1)',
-      borderWidth: 1,
-      fill: false,
-    }],
-  },
-  options: {
-    scales: {
-      x: {
-        type: 'time',
-        time: {
-          unit: 'minute',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Candlestick Data',
+        data: data,
+        borderColor: 'rgba(75, 192, 192, 1)',
+        borderWidth: 1,
+        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+      }],
+    },
+    options: {
+      scales: {
+        x: {
+          type: 'category',
+          grid: {
+            display: true,
+            color: 'rgba(200, 200, 200, 0.3)',
+          },
+          ticks: {
+            autoSkip: true,
+            maxRotation: 0,
+          },
+        },
+        y: {
+          grid: {
+            display: true,
+            color: 'rgba(200, 200, 200, 0.3)',
+          },
         },
       },
     },
-  }
-}
+  };
 // @ts-ignore
   const image = await chartJSNodeCanvas.renderToBuffer(configuration);
   return image;
