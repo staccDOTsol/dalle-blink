@@ -751,16 +751,7 @@ app.openapi(
     path: '/',
     tags: ['Degen Swap'],
     request: {
-      params: z.object({
-        tokenPair: z.string().openapi({
-          param: {
-            name: 'tokenPair',
-            in: 'path',
-          },
-          type: 'string',
-          example: 'USDC-SOL',
-        }),
-      }),
+      
     },
     responses: actionsSpecOpenApiGetResponse,
   }),
