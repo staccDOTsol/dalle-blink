@@ -743,60 +743,52 @@ const highchartsExportServer = require('highcharts-export-server');
 // Chart generation setup
 const width = 800;
 const height = 600;
-  const exporter = require('highcharts-export-server');
 
-
-
-highchartsExportServer.initPool();
 // Function to generate chart image
 const generateCandlestickChart = async (mint: any, data: any) => {
+  const { createCanvas, loadImage } = require('canvas');
+  const canvas = createCanvas(800, height);
+  const ctx = canvas.getContext('2d');
 
-  const chartConfig = {
-    chart: {
-      type: 'candlestick',
-    },
-    title: {
-      text: 'Candlestick Chart',
-    },
-    xAxis: {
-      type: 'datetime',
-    },
-    series: [{
-      name: 'Price',
-      data: data.map(d => [d.timestamp * 1000, d.open, d.high, d.low, d.close]),
-      tooltip: {
-        valueDecimals: 2
-      }
-    }]
-  };
+  // Draw the chart title
+  ctx.font = '20px Arial';
+  ctx.fillText('Candlestick Chart', 10, 30);
 
-  const exportSettings = {
-    type: 'png',
-    options: chartConfig,
-  };
+  // Draw the candlestick chart
+  data.forEach((d, index) => {
+    const x = index * 5 + 50;
+    const openY = height - d.open * 10;
+    const closeY = height - d.close * 10;
+    const highY = height - d.high * 10;
+    const lowY = height - d.low * 10;
 
-const exported = await    highchartsExportServer.export(exportSettings, async (err, res) => {
+    ctx.beginPath();
+    ctx.moveTo(x, highY);
+    ctx.lineTo(x, lowY);
+    ctx.stroke();
 
-          if (err) {
-              console.error('Error generating chart:', err);
-              return;
-          }
+    ctx.beginPath();
+    ctx.moveTo(x - 2, openY);
+    ctx.lineTo(x + 2, openY);
+    ctx.stroke();
 
-          // Convert the base64 image to a buffer and save it as a file
-          const imageBuffer = Buffer.from(res.data, 'base64');
-          const imagePath = new Date().getTime() + 'candlestick_chart.png';
-          await sharp(imageBuffer).toFile(imagePath);
+    ctx.beginPath();
+    ctx.moveTo(x - 2, closeY);
+    ctx.lineTo(x + 2, closeY);
+    ctx.stroke();
+  });
 
-          // Upload the image to Imgur
-          const imgurLink = await uploadImageToImgur(imagePath);
-          console.log('Imgur link:', imgurLink);
+  // Convert the canvas to a buffer and save it as a file
+  const imageBuffer = canvas.toBuffer('image/png');
+  const imagePath = new Date().getTime() + 'candlestick_chart.png';
+  await sharp(imageBuffer).toFile(imagePath);
 
-          // Kill the pool when we're done with it.
-          exporter.killPool();
-          return {imgurLink, imagePath}
-        })
-        return exported 
-      }
+  // Upload the image to Imgur
+  const imgurLink = await uploadImageToImgur(imagePath);
+  console.log('Imgur link:', imgurLink);
+
+  return { imgurLink, imagePath };
+}
 const app = new OpenAPIHono();
 
 app.openapi(
