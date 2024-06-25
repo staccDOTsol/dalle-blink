@@ -886,10 +886,10 @@ app.openapi(
         actions: [
           ...SWAP_AMOUNT_USD_OPTIONS.map((amount) => ({
             label: `${amount}`,
-            href: `/buy/${coin.mint}/${amount}`,
+            href: `/buy/${coin.mint}/${amount / candlestickData[candlestickData.length-1].close}`,
           })),
           {
-            href: `/buy/${coin.mint}/{${Math.floor(Number(amountParameterName) / candlestickData[candlestickData.length-1].close)}`,
+            href: `/buy/${coin.mint}/${Math.floor(Number.isNaN(Number(amountParameterName)) ? 0 : Number(amountParameterName) / candlestickData[candlestickData.length-1].close)}`,
             label: `Buy ${coin.name}`,
             parameters: [
               {
@@ -899,7 +899,7 @@ app.openapi(
             ],
           },
           {
-            href: `/sell/${coin.mint}/{${Math.floor(Number(amountParameterName) / candlestickData[candlestickData.length-1].close)}`,
+            href: `/sell/${coin.mint}/${isNaN(Number(amountParameterName)) ? 0 : Math.floor(Number(amountParameterName) / candlestickData[candlestickData.length-1].close)}`,
             label: `Sell ${coin.name}`,
             parameters: [
               {
