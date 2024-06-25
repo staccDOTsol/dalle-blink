@@ -11,8 +11,6 @@
     "start": "yarn tsx watch examples/index.ts"
   },
   "dependencies": {
-    "tsx": "latest",
-
     "@coral-xyz/anchor": "0.29.0",
     "@hono/node-server": "^1.11.3",
     "@hono/swagger-ui": "^0.3.0",
@@ -25,7 +23,9 @@
     "chartjs-node-canvas": "^4.1.6",
     "hono": "^4.4.7",
     "sharp": "^0.33.4",
-    "zod": "^3.23.8","typescript": "latest"
+    "tsx": "^4.15.7",
+    "typescript": "latest",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@types/node": "^20.11.17",
