@@ -40,7 +40,7 @@ const gameState = {
   leader: null as PublicKey | null,
   endTime: Date.now() + 3600000,
   totalSol: 0,
-  lastSol: 0,
+  lastSol: 100_000_000,
   totalBurned: 0,
 };
 
@@ -82,7 +82,7 @@ const resetGame = async (winner: PublicKey) => {
   gameState.leader = null;
   gameState.endTime = Date.now() + 3600000; // Reset timer to 1 hour.
   gameState.totalSol = 0;
-  gameState.lastSol = 0;
+  gameState.lastSol = 100_000_000;
   gameState.totalBurned = 0;
 
   await generateLeaderboardImage(gameState);
@@ -266,7 +266,7 @@ app.openapi(
       description: `Total SOL: ${gameState.totalSol / 10 ** 9} SOL, Total Burned: ${gameState.totalBurned}, Leader: ${gameState.leader?.toString() || 'None'}, Time Left: ${(gameState.endTime - Date.now()) / 1000} seconds`,
       links: {
         actions: [{
-            label: `Play for ${gameState.lastSol / 10 ** 9} SOL`,
+            label: `Play for ${(gameState.lastSol + 1) / 10 ** 9} SOL`,
             href: `/play`,
           }
         ]
