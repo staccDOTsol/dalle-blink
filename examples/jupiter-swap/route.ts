@@ -22,30 +22,28 @@ const width = 800;
 const height = 600;
 // Function to upload image to Imgur with caching
 const cache = new Map();
-import { create } from 'ipfs-http-client';
-import { Buffer } from 'buffer';
-
 // Infura IPFS setup
 const projectId = '2XjChM8WMK9UTvZENIfZH9ggTup';
 const projectSecret = 'f3e62c0c6f31a87388b3806d71ed7682';
 const auth = 'Basic ' + Buffer.from(projectId + ':' + projectSecret).toString('base64');
-
-const ipfs = create({
-  host: 'ipfs.infura.io',
-  port: 5001,
-  protocol: 'https',
-  headers: {
-    authorization: auth,
-  },
+const IPFS = require('ipfs-infura');
+const ipfs = new IPFS({
+  host: 'ipfs.infura.io', 
+  port: 5001, 
+  protocol: 'https', 
+  projectId,
+  projectSecret 
 });
+
+ipfs.add('hello world!').then(console.log).catch(console.log);
 
 // Function to upload image to Infura IPFS
 const uploadImageToIPFS = async (image: string) => {
   try {
-    const { path } = await ipfs.add(Buffer.from(image, 'base64'));
-    const gatewayLink = `https://ipfs.infura.io/ipfs/${path}`;
+    const path = await ipfs.add(Buffer.from(image, 'base64'));
+    const gatewayLink = `https://stacc.infura-ipfs.io/ipfs/${path}`;
     console.log('IPFS link:', gatewayLink);
-    return gatewayLink;
+        return gatewayLink;
   } catch (error) {
     console.error('Error uploading image to IPFS:', error);
     throw error;

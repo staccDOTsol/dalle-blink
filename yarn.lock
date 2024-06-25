@@ -2625,6 +2625,13 @@ ipfs-http-client@^60.0.1:
     stream-to-it "^0.2.2"
     uint8arrays "^4.0.2"
 
+ipfs-infura@^1.1.9:
+  version "1.1.9"
+  resolved "https://registry.yarnpkg.com/ipfs-infura/-/ipfs-infura-1.1.9.tgz#d90da2fee53ad034f6666cad518a8c5e8b98100a"
+  integrity sha512-cdDFUTigMoJfPAXVembzzuOsVp+0D+EQR/h4KyqXcA9YnH+t2q1biH8HXZpYwXMmnYOaiKWak07nbBEpkIq6bQ==
+  dependencies:
+    xmlhttprequest "^1.8.0"
+
 ipfs-unixfs@^9.0.0:
   version "9.0.1"
   resolved "https://registry.yarnpkg.com/ipfs-unixfs/-/ipfs-unixfs-9.0.1.tgz#d06e688e07ef4ce08d610337ba2fe8c143c386e7"
@@ -4416,6 +4423,11 @@ ws@^8.5.0:
   version "8.17.1"
   resolved "https://registry.yarnpkg.com/ws/-/ws-8.17.1.tgz#9293da530bb548febc95371d90f9c878727d919b"
   integrity sha512-6XQFvXTkbfUOZOKKILFG1PDK2NDQs4azKQl26T0YS5CxqWLgXajbPZ+h4gZekJyRqFU8pvnbAbbs/3TgRPy+GQ==
+
+xmlhttprequest@^1.8.0:
+  version "1.8.0"
+  resolved "https://registry.yarnpkg.com/xmlhttprequest/-/xmlhttprequest-1.8.0.tgz#67fe075c5c24fef39f9d65f5f7b7fe75171968fc"
+  integrity sha512-58Im/U0mlVBLM38NdZjHyhuMtCqa61469k2YP/AaPbvCoV9aQGUpbJBj1QRm2ytRiVQBD/fsw7L2bJGDVQswBA==
 
 xtend@^4.0.0:
   version "4.0.2"
