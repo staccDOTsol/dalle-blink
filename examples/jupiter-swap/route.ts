@@ -738,60 +738,67 @@ const getCandlestickData = async (mint: string) => {
   }));
   return formattedData;
 };
+const highchartsExportServer = require('highcharts-export-server');
+
 
 // Chart generation setup
 const width = 800;
 const height = 600;
 const chartJSNodeCanvas = new ChartJSNodeCanvas({ width, height });
-const generateCandlestickChart = async (mint: any, candlestickData: any) => {
-  const labels = candlestickData.map((item: any, index: number) => index + 1);
-  const data = candlestickData.map((item: any) => ({
-    o: item.open,
-    h: item.high,
-    l: item.low,
-    c: item.close,
-  }));
 
-  const configuration: ChartConfiguration<'line'> = {
+// Function to generate chart image
+const generateCandlestickChart = async (mint: any, data: any) => {
 
-    type: 'line',
-    data: {
-      labels: labels,
-      datasets: [{
-        label: 'Candlestick Data',
-        data: data,
-        borderColor: 'rgba(75, 192, 192, 1)',
-        borderWidth: 1,
-        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-      }],
-    },
-    options: {
-      scales: {
-        x: {
-          type: 'category',
-          grid: {
-            display: true,
-            color: 'rgba(200, 200, 200, 0.3)',
-          },
-          ticks: {
-            autoSkip: true,
-            maxRotation: 0,
-          },
-        },
-        y: {
-          grid: {
-            display: true,
-            color: 'rgba(200, 200, 200, 0.3)',
-          },
-        },
+  // Initialize the export server
+  highchartsExportServer.initPool();
+
+  // Chart configuration
+  const chartConfig = {
+      chart: {
+          type: 'candlestick',
       },
-    },
+      title: {
+          text: 'Candlestick Chart',
+      },
+      xAxis: {
+          type: 'datetime',
+      },
+      series: [{
+          name: 'Price',
+          data: data.map(d => [d.timestamp * 1000, d.open, d.high, d.low, d.close]),
+          tooltip: {
+              valueDecimals: 2
+          }
+      }]
   };
-// @ts-ignore
-  const image = await chartJSNodeCanvas.renderToBuffer(configuration);
-  return image;
-};
 
+  // Export settings
+  const exportSettings = {
+      type: 'png',
+      options: chartConfig,
+  };
+
+  // Export the chart
+  return await highchartsExportServer.export(exportSettings, async (err, res) => {
+      if (err) {
+          console.error('Error generating chart:', err);
+          return;
+      }
+
+      // Convert the base64 image to a buffer and save it as a file
+      const imageBuffer = Buffer.from(res.data, 'base64');
+      const imagePath = new Date().getTime()+'candlestick_chart.png';
+      await sharp(imageBuffer).toFile(imagePath);
+
+      // Upload the image to Imgur
+      const imgurLink = await uploadImageToImgur(imagePath);
+      console.log('Imgur link:', imgurLink);
+
+      // Shutdown the export server
+      highchartsExportServer.killPool();
+      return {imgurLink, imagePath}
+  });
+};
 const app = new OpenAPIHono();
 
 app.openapi(
@@ -813,9 +820,11 @@ app.openapi(
     const candlestickData = await getCandlestickData(latestCoin.mint);
     const candlestickData2 = await getCandlestickData(kothCoin.mint);
 
-    const image1 = await generateCandlestickChart(latestCoin.mint, candlestickData);
-    const image2 = await generateCandlestickChart(kothCoin.mint, candlestickData2);
+    const i1 = await generateCandlestickChart(latestCoin.mint, candlestickData);
+    const i2 = await generateCandlestickChart(kothCoin.mint, candlestickData2);
+    const image1 = fs.readFileSync(i1.imagePath)
 
+    const image2 = fs.readFileSync(i2.imagePath)
     // Combine images side-by-side
     const combinedImage = await sharp({
       create: {
@@ -887,21 +896,11 @@ app.openapi(
 
     const image1 = await generateCandlestickChart(mint, candlestickData);
 
-    // Ensure the public directory exists
-    const publicDir = path.join(__dirname, '..', 'public');
-    if (!fs.existsSync(publicDir)) {
-      fs.mkdirSync(publicDir);
-    }
-
-    const base64image = image1.toString('base64');
-    
-  const r = await uploadImageToImgur(base64image)
-
 
   const coin = await(await fetch("https://frontend-api.pump.fun/coins/"+mint)).json()
 
   const response: ActionsSpecGetResponse = {
-    icon: r,
+    icon: image1.imgurLink,
       label: `Swap ${coin.name}`,
       title: `Swap ${coin.name}`,
       description: `Swap ${coin.name} with SOL. Choose a SOL amount of either from the options below, or enter a custom amount.`,
