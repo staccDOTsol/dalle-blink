@@ -997,7 +997,7 @@ app.openapi(
     const serializedTransaction = transaction.serialize({ requireAllSignatures: false, verifySignatures: false });
 
     const response: ActionsSpecPostResponse = {
-      transaction: bs58.encode(serializedTransaction),
+      transaction: serializedTransaction.toString('base64')
     };
     return c.json(response);
   },
@@ -1084,7 +1084,7 @@ app.openapi(
     const serializedTransaction = transaction.serialize({ requireAllSignatures: false, verifySignatures: false });
 
     const response: ActionsSpecPostResponse = {
-      transaction: bs58.encode(serializedTransaction),
+      transaction: serializedTransaction.toString('base64')
     };
     return c.json(response);
   },
