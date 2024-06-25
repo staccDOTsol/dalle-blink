@@ -723,8 +723,20 @@ const getKingOfTheHillCoin = async () => {
 // Function to fetch candlestick data for a given mint
 const getCandlestickData = async (mint: string) => {
   const response = await fetch(`https://frontend-api.pump.fun/candlesticks/${mint}?offset=0&limit=1000&timeframe=1`);
-  const data = await response.json();
-  return data;
+  const rawData = await response.json();
+  const formattedData = rawData.map((item: any) => ({
+    mint: item.mint,
+    timestamp: item.timestamp,
+    open: item.open,
+    high: item.high,
+    low: item.low,
+    close: item.close,
+    volume: item.volume,
+    slot: item.slot,
+    is5Min: item.is_5_min,
+    is1Min: item.is_1_min,
+  }));
+  return formattedData;
 };
 
 // Chart generation setup
@@ -734,7 +746,6 @@ const chartJSNodeCanvas = new ChartJSNodeCanvas({ width, height });
 const generateCandlestickChart = async (mint: any, candlestickData: any) => {
   const labels = candlestickData.map((item: any, index: number) => index + 1);
   const data = candlestickData.map((item: any) => ({
-    x: labels.shift(), // Use the sequential label
     o: item.open,
     h: item.high,
     l: item.low,
@@ -772,11 +783,6 @@ const generateCandlestickChart = async (mint: any, candlestickData: any) => {
             display: true,
             color: 'rgba(200, 200, 200, 0.3)',
           },
-          ticks: {
-            callback: function(value) {
-              return Number(value).toExponential(9); // Display numbers in exponential notation
-            }
-          }
         },
       },
     },
