@@ -774,7 +774,7 @@ const generateCandlestickChart = async (mint: any, candlestickData: any) => {
           },
           ticks: {
             callback: function(value) {
-              return Number(value).toExponential(1); // Display numbers in exponential notation
+              return Number(value).toExponential(9); // Display numbers in exponential notation
             }
           }
         },
