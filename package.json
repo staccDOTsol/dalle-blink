@@ -9,7 +9,7 @@
   "scripts": {
     "install": "npm i -g yarn",
     "dev": "yarn tsx watch examples/index.ts",
-    "start": "yarn tsx watch examples/index.ts",       "postinstall": "puppeteer install"
+    "start": "yarn tsx watch examples/index.ts",       "postinstall": "puppeteer install && npx puppeteer browsers install chrome"
 
   },
   "dependencies": {
