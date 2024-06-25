@@ -738,62 +738,42 @@ const getCandlestickData = async (mint: string) => {
   }));
   return formattedData;
 };
-const highchartsExportServer = require('highcharts-export-server');
 
-// Chart generation setup
-const width = 800;
-const height = 600;
-// Function to generate chart image
-const generateCandlestickChart = async (mint: any, data: any) => {
-  const { createCanvas, loadImage } = require('canvas');
-  const canvas = createCanvas(800, height);
-  const ctx = canvas.getContext('2d');
+const chartJSNodeCanvas = new ChartJSNodeCanvas({ width, height });
+const generateCandlestickChart = async (mint: any, candlestickData: any) => {
+  const labels = candlestickData.map((item: any, index: number) => index + 1);
+  const data = candlestickData.map((item: any) => ({
+    x: item.timestamp, // Use the sequential label
+    y: item.close,
+  }));
+  console.log(data)
 
-  // Draw the chart title
-  ctx.font = '20px Arial';
-  ctx.fillText('Candlestick Chart', 10, 30);
+  const configuration: any = {
 
-  // Draw the candlestick chart
-  data.forEach((d, index) => {
-    const x = index * 5 + 50;
-    const openY = height - d.open * 10;
-    const closeY = height - d.close * 10;
-    const highY = height - d.high * 10;
-    const lowY = height - d.low * 10;
-
-    ctx.beginPath();
-    ctx.moveTo(x, highY);
-    ctx.lineTo(x, lowY);
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.moveTo(x - 2, openY);
-    ctx.lineTo(x + 2, openY);
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.moveTo(x - 2, closeY);
-    ctx.lineTo(x + 2, closeY);
-    ctx.stroke();
-  });
-
-  // Convert the canvas to a buffer and save it as a file
-  const imageBuffer = canvas.toBuffer('image/png');
-  const imagePath = new Date().getTime() + 'candlestick_chart.png';
-  await sharp(imageBuffer).toFile(imagePath);
-
-  // Log the image buffer and base64 string
-  console.log('Image Buffer:', imageBuffer);
-  const base64Image = imageBuffer.toString('base64');
-  console.log('Base64 Image:', base64Image);
-
-  // Upload the image to Imgur
-  const imgurLink = await uploadImageToImgur(base64Image);
-  console.log('Imgur link:', imgurLink);
-
-  return { imgurLink, imagePath };
-}
-
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Candlestick Data',
+        data: data,
+        borderColor: 'rgba(75, 192, 192, 1)',
+        borderWidth: 1,
+        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+      }],
+    },
+    options: {
+      scales: {
+      
+      },
+    },
+  };
+// @ts-ignore
+  const image = await chartJSNodeCanvas.renderToBuffer(configuration);
+  const path = new Date().getTime().toString()+'.png'
+  fs.writeFileSync(path, image)
+  const img = await uploadImageToImgur(image.toString('base64'))
+  return {imagePath: path, imgurLink: img}
+};
 const app = new OpenAPIHono();
 
 app.openapi(
