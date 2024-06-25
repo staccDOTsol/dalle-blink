@@ -845,7 +845,7 @@ app.openapi(
     tags: ['Degen Swap'],
     request: {
       params: z.object({
-        tokenPair: z.string().openapi({
+        coin: z.string().openapi({
           param: {
             name: 'coin',
             in: 'path',
