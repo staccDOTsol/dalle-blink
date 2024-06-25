@@ -805,6 +805,7 @@ app.openapi(
     });
 
     const imgurData = await r.json();
+    console.log(imgurData)
     const filePath = imgurData.data.link;
     const response: ActionsSpecGetResponse = {
       icon: filePath,
@@ -870,6 +871,8 @@ app.openapi(
     });
 
     const imgurData = await r.json();
+    console.log(imgurData)
+
     const filePath = imgurData.data.link;
     const coin = await(await fetch("https://frontend-api.pump.fun/coins/"+mint)).json()
     const response: ActionsSpecGetResponse = {
