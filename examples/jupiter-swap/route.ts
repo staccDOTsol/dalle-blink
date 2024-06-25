@@ -20,7 +20,9 @@ const Imgur = new imgur({
 const uploadImageToImgur = async (image: string) => {
   try {
     const response = await Imgur.upload({
-      image
+      image,
+
+      type: "base64"
     });
     console.log(response.data)
     return response.data.link;
@@ -808,8 +810,10 @@ app.openapi(
         { input: image2, left: width, top: 0 }
       ])
       .toBuffer();
-      fs.writeFileSync(`image_${dt}.png`, combinedImage);
-    const r = await uploadImageToImgur(`image_${dt}.png`)
+
+      const base64image = combinedImage.toString('base64');
+      
+    const r = await uploadImageToImgur(base64image)
 
 
 
@@ -858,22 +862,20 @@ app.openapi(
   async (c) => {
     const mint = c.req.param('coin');
     const amountParameterName = 'amount';
+    const dt = new Date().getTime();
     const candlestickData = await getCandlestickData(mint as string);
 
     const image1 = await generateCandlestickChart(mint, candlestickData);
-    const dt = new Date().getTime();
-    const imagePath = path.join(__dirname, '..', 'public', `candlestick_${dt}.png`);
-    
+
     // Ensure the public directory exists
     const publicDir = path.join(__dirname, '..', 'public');
     if (!fs.existsSync(publicDir)) {
       fs.mkdirSync(publicDir);
     }
 
-    fs.writeFileSync(imagePath, image1);
-
+    const base64image = image1.toString('base64');
     
-  const r = await uploadImageToImgur(imagePath)
+  const r = await uploadImageToImgur(base64image)
 
 
   const coin = await(await fetch("https://frontend-api.pump.fun/coins/"+mint)).json()
