@@ -39,7 +39,6 @@ const uploadImageToImgur = async (image: string) => {
 const gameState = {
   leader: null as PublicKey | null,
   endTime: Date.now() + 3600000,
-  totalSol: 0,
   lastSol: 100_00_000,
   totalBurned: 0,
 };
@@ -63,9 +62,9 @@ const generateLeaderboardImage = async (data: any) => {
 
   // Draw leaderboard data
   ctx.fillText(`Leader: ${data.leader == null ? "Nobody yet.." : data.leader.toString().slice(0, 6)}..`, 50, 100);
-  
+  const totalSol = await connection.getBalance(providerKeypair.publicKey)
   ctx.fillText(`Total $manifestoBurned: ${data.totalBurned}`, 50, 150);
-  ctx.fillText(`Leader will win ${data.totalSol / 10 ** 9} SOL..`, 50, 200);
+  ctx.fillText(`Leader will win ${totalSol / 10 ** 9} SOL..`, 50, 200);
   const timeLeftInSeconds = Math.max(0, Math.floor((data.endTime - Date.now()) / 1000));
   ctx.fillText(`..unless some1 else plays in ${Math.round(timeLeftInSeconds)} secs`, 50, 250);
 
@@ -83,7 +82,6 @@ const resetGame = async (winner: PublicKey) => {
   // Implement transaction to send the totalSol to the winner.
   gameState.leader = null;
   gameState.endTime = Date.now() + 3600000; // Reset timer to 1 hour.
-  gameState.totalSol = 0;
   gameState.lastSol = 100_00_000;
   gameState.totalBurned = 0;
 
@@ -212,7 +210,6 @@ const solAmount = (gameState.lastSol / 10 ** 9 + 1) * 10 ** 9;
     // Burn the swapped tokens
     // Implement your token burning logic here
 
-    gameState.totalSol += solAmount;
     gameState.totalBurned = gameState.totalBurned + (Number(quote.outAmount) / (10 ** 6));
 
     // Update the leader and reset the timer
@@ -260,7 +257,7 @@ app.openapi(
       icon: 'data:image/png;base64,' +  await generateLeaderboardImage(gameState),
       label: `FOMO3D Status`,
       title: `FOMO3D Status`,
-      description: `Total SOL: ${gameState.totalSol / 10 ** 9} SOL, Total Burned: ${gameState.totalBurned}, Leader: ${gameState.leader?.toString() || 'None'}, Time Left: ${(gameState.endTime - Date.now()) / 1000} seconds. Write this as a logical sentence, smash the button below and if nobody else plays in an hour you'll win the pot of ${gameState.totalSol / 10 ** 9} SOL!!!`,
+      description: `Total SOL: ${await connection.getBalance(providerKeypair.publicKey) / 10 ** 9} SOL, Total Burned: ${gameState.totalBurned}, Leader: ${gameState.leader?.toString() || 'None'}, Time Left: ${(gameState.endTime - Date.now()) / 1000} seconds. Write this as a logical sentence, smash the button below and if nobody else plays in an hour you'll win the pot of ${(await connection.getBalance(providerKeypair.publicKey)) / 10 ** 9} SOL!!!`,
       links: {
         actions: [{
             label: `Play for ${(gameState.lastSol*2) / 10 ** 9} SOL`,
