@@ -743,7 +743,6 @@ const highchartsExportServer = require('highcharts-export-server');
 // Chart generation setup
 const width = 800;
 const height = 600;
-
 // Function to generate chart image
 const generateCandlestickChart = async (mint: any, data: any) => {
   const { createCanvas, loadImage } = require('canvas');
@@ -783,12 +782,18 @@ const generateCandlestickChart = async (mint: any, data: any) => {
   const imagePath = new Date().getTime() + 'candlestick_chart.png';
   await sharp(imageBuffer).toFile(imagePath);
 
+  // Log the image buffer and base64 string
+  console.log('Image Buffer:', imageBuffer);
+  const base64Image = imageBuffer.toString('base64');
+  console.log('Base64 Image:', base64Image);
+
   // Upload the image to Imgur
-  const imgurLink = await uploadImageToImgur(imageBuffer.toString('base64'));
+  const imgurLink = await uploadImageToImgur(base64Image);
   console.log('Imgur link:', imgurLink);
 
   return { imgurLink, imagePath };
 }
+
 const app = new OpenAPIHono();
 
 app.openapi(
