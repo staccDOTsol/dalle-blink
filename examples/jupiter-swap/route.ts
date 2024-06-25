@@ -15,7 +15,11 @@ const Imgur = new imgur({
   clientId:'06f787d29bb77bf',
   clientSecret:'f2966431bf8f496742a06d6ed36431c31a760f0e'
 })
+const { ChartConfiguration } = require( "chart.js" );
 
+// Chart generation setup
+const width = 800;
+const height = 600;
 // Function to upload image to Imgur
 const uploadImageToImgur = async (image: string) => {
   try {
