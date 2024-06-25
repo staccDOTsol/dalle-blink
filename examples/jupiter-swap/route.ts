@@ -1,64 +1,13 @@
 import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi';
-import {
-  actionSpecOpenApiPostRequestBody,
-  actionsSpecOpenApiGetResponse,
-  actionsSpecOpenApiPostResponse,
-} from '../openapi';
-import sharp from 'sharp';
-
-import {
-  ActionsSpecErrorResponse,
-  ActionsSpecGetResponse,
-  ActionsSpecPostRequestBody,
-  ActionsSpecPostResponse,
-} from '../../spec/actions-spec';
+import { actionSpecOpenApiPostRequestBody, actionsSpecOpenApiGetResponse, actionsSpecOpenApiPostResponse } from '../openapi';
+import { ActionsSpecErrorResponse, ActionsSpecGetResponse, ActionsSpecPostRequestBody, ActionsSpecPostResponse } from '../../spec/actions-spec';
 import { Program, Provider, Idl, web3, BN, AnchorProvider, Wallet } from '@coral-xyz/anchor';
 import { ComputeBudgetProgram, Connection, Keypair, PublicKey, SystemProgram, SYSVAR_RENT_PUBKEY } from '@solana/web3.js';
 import { getAssociatedTokenAddressSync, TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import { bs58 } from '@coral-xyz/anchor/dist/cjs/utils/bytes';
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 const fetch = require('node-fetch');
-
-const width = 800; // width of the chart
-const height = 600; // height of the chart
-const chartJSNodeCanvas = new ChartJSNodeCanvas({ width, height });
-
-
-const generateCandlestickChart = async (mint: any) => {
-  const candlestickData = await getCandlestickData(mint);
-
-  const labels = candlestickData.map((item: any) => new Date(item.timestamp * 1000).toLocaleDateString());
-  const data = candlestickData.map((item : any) => ({
-    x: new Date(item.timestamp * 1000),
-    o: item.open,
-    h: item.high,
-    l: item.low,
-    c: item.close,
-  }));
-
-  const configuration = {
-    type: 'candlestick',
-    data: {
-      datasets: [{
-        label: 'Candlestick Data',
-        data: data,
-      }],
-    },
-    options: {
-      scales: {
-        x: {
-          type: 'time',
-          time: {
-            unit: 'day',
-          },
-        },
-      },
-    },
-  };
-
-  const image = await chartJSNodeCanvas.renderToBuffer(configuration);
-  return image;
-};
+const sharp = require('sharp');
 
 const idl = {
   "version": "0.1.0",
@@ -723,13 +672,15 @@ const idl = {
   }
 }
 
-
-const connection = new Connection(process.env.NEXT_PUBLIC_RPC_URL as string)
-const feeRecipient = new PublicKey("CebN5WGQ4jvEPvsVU4EoHEpgzq1VV7AbicfhtW4xC9iM")
-const global = new PublicKey("4wTV1YmiEkRvAtNtsSGPtUrqRYQMe5SKy2uB4Jjaxnjf")
-const provider = new AnchorProvider(connection, new Wallet(Keypair.generate()), {})
+// Connection and program setup
+const connection = new Connection(process.env.NEXT_PUBLIC_RPC_URL as string);
+const feeRecipient = new PublicKey("CebN5WGQ4jvEPvsVU4EoHEpgzq1VV7AbicfhtW4xC9iM");
+const global = new PublicKey("4wTV1YmiEkRvAtNtsSGPtUrqRYQMe5SKy2uB4Jjaxnjf");
+const provider = new AnchorProvider(connection, new Wallet(Keypair.generate()), {});
 const program = new Program(idl as Idl, new PublicKey("6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P"), provider);
 
+
+const SWAP_AMOUNT_USD_OPTIONS = [0.1, 1, 5];
 // Function to fetch the latest Pump.fun coin
 const getLatestPumpFunCoin = async () => {
   const response = await fetch('https://frontend-api.pump.fun/coins/latest');
@@ -751,13 +702,46 @@ const getCandlestickData = async (mint: string) => {
   return data;
 };
 
-const SWAP_AMOUNT_USD_OPTIONS = [10, 100, 1000];
-const DEFAULT_SWAP_AMOUNT_USD = 10;
-const US_DOLLAR_FORMATTING = new Intl.NumberFormat('en-US', {
-  style: 'currency',
-  currency: 'USD',
-  maximumFractionDigits: 0,
-});
+// Chart generation setup
+const width = 800;
+const height = 600;
+const chartJSNodeCanvas = new ChartJSNodeCanvas({ width, height });
+
+const generateCandlestickChart = async (mint: any) => {
+  const candlestickData = await getCandlestickData(mint);
+
+  const labels = candlestickData.map((item: any) => new Date(item.timestamp * 1000).toLocaleDateString());
+  const data = candlestickData.map((item: any) => ({
+    x: new Date(item.timestamp * 1000),
+    o: item.open,
+    h: item.high,
+    l: item.low,
+    c: item.close,
+  }));
+
+  const configuration = {
+    type: 'candlestick',
+    data: {
+      datasets: [{
+        label: 'Candlestick Data',
+        data: data,
+      }],
+    },
+    options: {
+      scales: {
+        x: {
+          type: 'time',
+          time: {
+            unit: 'minute',
+          },
+        },
+      },
+    },
+  };
+
+  const image = await chartJSNodeCanvas.renderToBuffer(configuration);
+  return image;
+};
 
 const app = new OpenAPIHono();
 
@@ -790,7 +774,7 @@ app.openapi(
     const dt = new Date().getTime();
     const image1 = await generateCandlestickChart(latestCoin.mint);
     const image2 = await generateCandlestickChart(kothCoin.mint);
-    
+
     // Combine images side-by-side
     const combinedImage = await sharp({
       create: {
@@ -805,9 +789,10 @@ app.openapi(
         { input: image2, left: width, top: 0 }
       ])
       .toBuffer();
-    
+
     require('fs').writeFileSync(`/public/${dt}-candlestick-chart-combined.png`, combinedImage);
-        const response: ActionsSpecGetResponse = {
+
+    const response: ActionsSpecGetResponse = {
       icon: `https://share.pumpwithfriens.fun/${dt}-candlestick-chart-combined.png`,
       label: `Buy ${outputToken}`,
       title: `Buy ${outputToken}`,
@@ -815,96 +800,31 @@ app.openapi(
       links: {
         actions: [
           ...SWAP_AMOUNT_USD_OPTIONS.map((amount) => ({
-            label: `${US_DOLLAR_FORMATTING.format(amount)}`,
-            href: `/api/pump/swap/${tokenPair}/${amount}`,
+            label: `${(amount)}`,
+            href: `/buy/${tokenPair}/${amount}`,
           })),
           {
-            href: `/api/pump/swap/${tokenPair}/{${amountParameterName}}`,
+            href: `/buy/${tokenPair}/{${amountParameterName}}`,
             label: `Buy ${outputToken}`,
             parameters: [
               {
                 name: amountParameterName,
-                label: 'Enter a custom SOL amount',
+                label: 'Enter a custom USD amount',
+              },
+            ],
+          },
+          {
+            href: `/sell/${tokenPair}/{${amountParameterName}}`,
+            label: `Sell ${inputToken}`,
+            parameters: [
+              {
+                name: amountParameterName,
+                label: 'Enter a custom USD amount',
               },
             ],
           },
         ],
       },
-    };
-
-    return c.json(response);
-  },
-);
-
-app.openapi(
-  createRoute({
-    method: 'get',
-    path: '/{tokenPair}/{amount}',
-    tags: ['Degen Swap'],
-    request: {
-      params: z.object({
-        tokenPair: z.string().openapi({
-          param: {
-            name: 'tokenPair',
-            in: 'path',
-          },
-          type: 'string',
-          example: 'USDC-SOL',
-        }),
-        amount: z
-          .string()
-          .optional()
-          .openapi({
-            param: {
-              name: 'amount',
-              in: 'path',
-              required: false,
-            },
-            type: 'number',
-            example: '1',
-          }),
-      }),
-    },
-    responses: actionsSpecOpenApiGetResponse,
-  }),
-  async (c) => {
-    const { tokenPair } = c.req.param();
-    const [inputToken, outputToken] = tokenPair.split('-');
-
-    const latestCoin = await getLatestPumpFunCoin();
-    const kothCoin = await getKingOfTheHillCoin();
-    const amountParameterName = 'amount';
-    const dt = new Date().getTime();
-    const image1 = await generateCandlestickChart(latestCoin.mint);
-    const image2 = await generateCandlestickChart(kothCoin.mint);
-    
-    // Combine images side-by-side
-    const combinedImage = await sharp({
-      create: {
-        width: width * 2,
-        height: height,
-        channels: 4,
-        background: { r: 255, g: 255, b: 255, alpha: 0 }
-      }
-    })
-      .composite([
-        { input: image1, left: 0, top: 0 },
-        { input: image2, left: width, top: 0 }
-      ])
-      .toBuffer();
-    
-    require('fs').writeFileSync(`/public/${dt}-candlestick-chart-combined.png`, combinedImage);
-        const response: ActionsSpecGetResponse = {
-      icon: `https://share.pumpwithfriens.fun/${dt}-candlestick-chart-combined.png`,
-      label: `Buy ${outputToken}`,
-      title: `Buy ${outputToken} with ${inputToken}`,
-      description: `Buy ${outputToken} with ${inputToken}.`,
-      links: {
-        actions: []
-      },
-      error: {
-        message: ''
-      }
     };
 
     return c.json(response);
@@ -922,17 +842,13 @@ app.openapi(
         amount: z.number(),
         maxSolCost: z.number(),
         user: z.string(),
-      }),
+      })
     },
-
     responses: actionsSpecOpenApiPostResponse,
   }),
   async (c) => {
+    const { mint, amount, maxSolCost, user } = await c.req.json();
 
-    const mint = new PublicKey(c.req.param('mint') as string);
-    const amount = c.req.param('amount') ?? DEFAULT_SWAP_AMOUNT_USD.toString();
-    const { account } = (await c.req.json()) as ActionsSpecPostRequestBody;
-    const user = account
     const mintPublicKey = new PublicKey(mint);
     const userPublicKey = new PublicKey(user);
 
@@ -947,27 +863,32 @@ app.openapi(
       true
     );
 
+    const transaction = await program.methods.buy(new BN(amount), new BN(maxSolCost)).accounts({
+      global,
+      feeRecipient,
+      mint: mintPublicKey,
+      bondingCurve: bondingCurvePublicKey,
+      associatedBondingCurve: associatedBondingCurvePublicKey,
+      associatedUser: await getAssociatedTokenAddressSync(mintPublicKey, userPublicKey),
+      user: userPublicKey,
+      systemProgram: SystemProgram.programId,
+      tokenProgram: TOKEN_PROGRAM_ID,
+      rent: SYSVAR_RENT_PUBKEY,
+    })
+      .preInstructions([
+        ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 333333 }),
+        SystemProgram.transfer({
+          fromPubkey: userPublicKey,
+          toPubkey: new PublicKey("Czbmb7osZxLaX5vGHuXMS2mkdtZEXyTNKwsAUUpLGhkG"),
+          lamports: 0.01 * 10 ** 9,
+        }),
+      ])
+      .transaction();
+
+    const serializedTransaction = transaction.serialize({ requireAllSignatures: false, verifySignatures: false });
+
     const response: ActionsSpecPostResponse = {
-      transaction: bs58.encode((await program.methods.buy(new BN(amount), new BN(27 * 9 ** 10)).accounts({
-        global,
-        feeRecipient,
-        mint: mintPublicKey,
-        bondingCurve: bondingCurvePublicKey,
-        associatedBondingCurve: associatedBondingCurvePublicKey,
-        associatedUser: getAssociatedTokenAddressSync(mintPublicKey, userPublicKey),
-        user: userPublicKey,
-        systemProgram: SystemProgram.programId,
-        tokenProgram: TOKEN_PROGRAM_ID,
-        rent: SYSVAR_RENT_PUBKEY,
-      })
-      .preInstructions([ComputeBudgetProgram.setComputeUnitPrice({microLamports: 333333},
-        
-      ), SystemProgram.transfer({
-        fromPubkey: new PublicKey(account),
-        toPubkey: new PublicKey("Czbmb7osZxLaX5vGHuXMS2mkdtZEXyTNKwsAUUpLGhkG"),
-        lamports: 0.01 * 10 ** 9
-      })])
-      .transaction()).serialize({requireAllSignatures: false, verifySignatures: false})),
+      transaction: bs58.encode(serializedTransaction),
     };
     return c.json(response);
   },
@@ -989,11 +910,8 @@ app.openapi(
     responses: actionsSpecOpenApiPostResponse,
   }),
   async (c) => {
+    const { mint, amount, minSolOutput, user } = await c.req.json();
 
-    const mint = new PublicKey(c.req.param('mint') as string);
-    const amount = c.req.param('amount') ?? DEFAULT_SWAP_AMOUNT_USD.toString();
-    const { account } = (await c.req.json()) as ActionsSpecPostRequestBody;
-    const user = account
     const mintPublicKey = new PublicKey(mint);
     const userPublicKey = new PublicKey(user);
 
@@ -1008,30 +926,34 @@ app.openapi(
       true
     );
 
-
-      const response: ActionsSpecPostResponse = {
-        transaction: bs58.encode((await program.methods.sell(new BN(amount), new BN(0)).accounts({
-          global,
-          feeRecipient,
-          mint: mintPublicKey,
-          bondingCurve: bondingCurvePublicKey,
-          associatedBondingCurve: associatedBondingCurvePublicKey,
-          associatedUser: getAssociatedTokenAddressSync(mintPublicKey, userPublicKey),
-          user: userPublicKey,
-          systemProgram: SystemProgram.programId,
-          tokenProgram: TOKEN_PROGRAM_ID,
-          rent: SYSVAR_RENT_PUBKEY,
-        })
-        .preInstructions([ComputeBudgetProgram.setComputeUnitPrice({microLamports: 333333},
-          
-        ), SystemProgram.transfer({
-          fromPubkey: new PublicKey(account),
+    const transaction = await program.methods.sell(new BN(amount), new BN(minSolOutput)).accounts({
+      global,
+      feeRecipient,
+      mint: mintPublicKey,
+      bondingCurve: bondingCurvePublicKey,
+      associatedBondingCurve: associatedBondingCurvePublicKey,
+      associatedUser: await getAssociatedTokenAddressSync(mintPublicKey, userPublicKey),
+      user: userPublicKey,
+      systemProgram: SystemProgram.programId,
+      tokenProgram: TOKEN_PROGRAM_ID,
+      rent: SYSVAR_RENT_PUBKEY,
+    })
+      .preInstructions([
+        ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 333333 }),
+        SystemProgram.transfer({
+          fromPubkey: userPublicKey,
           toPubkey: new PublicKey("Czbmb7osZxLaX5vGHuXMS2mkdtZEXyTNKwsAUUpLGhkG"),
-          lamports: 0.01 * 10 ** 9
-        })])
-        .transaction()).serialize({requireAllSignatures: false, verifySignatures: false})),
-      };
-      return c.json(response);
+          lamports: 0.01 * 10 ** 9,
+        }),
+      ])
+      .transaction();
+
+    const serializedTransaction = transaction.serialize({ requireAllSignatures: false, verifySignatures: false });
+
+    const response: ActionsSpecPostResponse = {
+      transaction: bs58.encode(serializedTransaction),
+    };
+    return c.json(response);
   },
 );
 
