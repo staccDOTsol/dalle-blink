@@ -772,6 +772,11 @@ const generateCandlestickChart = async (mint: any, candlestickData: any) => {
             display: true,
             color: 'rgba(200, 200, 200, 0.3)',
           },
+          ticks: {
+            callback: function(value) {
+              return Number(value).toExponential(1); // Display numbers in exponential notation
+            }
+          }
         },
       },
     },
