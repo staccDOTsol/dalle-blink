@@ -775,12 +775,10 @@ const generateCandlestickChart = async (mint: any, data: any) => {
     options: chartConfig,
   };
 
-  return new Promise((resolve, reject) => {
-    highchartsExportServer.export(exportSettings, async (err, res) => {
+const exported = await    highchartsExportServer.export(exportSettings, async (err, res) => {
 
           if (err) {
               console.error('Error generating chart:', err);
-              reject(err);
               return;
           }
 
@@ -795,10 +793,10 @@ const generateCandlestickChart = async (mint: any, data: any) => {
 
           // Kill the pool when we're done with it.
           exporter.killPool();
-          resolve({ imgurLink, imagePath });
-      });
-  });
-};
+          return {imgurLink, imagePath}
+        })
+        return exported 
+      }
 const app = new OpenAPIHono();
 
 app.openapi(
