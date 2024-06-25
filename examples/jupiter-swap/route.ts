@@ -99,12 +99,20 @@ app.openapi(
     responses: actionsSpecOpenApiPostResponse,
   }),
   async (c) => {
+    let sigs: any[] = []
     if (gameState.leader == null){
-      let sigs = await connection.getSignaturesForAddress(providerKeypair.publicKey, {limit: 1000})
+       sigs = await connection.getSignaturesForAddress(providerKeypair.publicKey, {limit: 1000})
+
       const lastTx = await connection.getTransaction(sigs[sigs.length-1].signature)
       gameState.leader = lastTx?.transaction.message.accountKeys[0] as PublicKey
     }
-    const { account } = (await c.req.json()) as { account: string; solAmount: number };
+    while (sigs.length == 1000 ) {
+    sigs = await connection.getSignaturesForAddress(providerKeypair.publicKey, {limit: 1000,before: sigs[sigs.length-1].signature})
+    }
+    const lastTx = await connection.getTransaction(sigs[sigs.length-1].signature)
+    gameState.leader = lastTx?.transaction.message.accountKeys[0] as PublicKey
+
+
 const solAmount = ((gameState.lastSol / 10 ** 9) + 1) * 10 ** 9;
     if (new BN(solAmount).toNumber() <= gameState.lastSol) {
       return c.json({
