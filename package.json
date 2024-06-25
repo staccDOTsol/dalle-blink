@@ -1,6 +1,7 @@
 {
   "name": "@dialectlabs/actions",
   "version": "0.0.0",
+  "type": "module",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
@@ -9,7 +10,7 @@
   "scripts": {
     "dev": "ts-node examples/index.ts",
     "build": "npm i -g ts-node",
-    "start": "ts-node examples/index.ts"
+    "start": "npx ts-node examples/index.ts"
   },
   "dependencies": {
     "@coral-xyz/anchor": "0.29.0",
@@ -24,6 +25,8 @@
     "chartjs-node-canvas": "^4.1.6",
     "hono": "^4.4.7",
     "sharp": "^0.33.4",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.2",
     "zod": "^3.23.8"
   },
   "devDependencies": {
