@@ -12,6 +12,7 @@
     "start": "node examples/index.js"
   },
   "dependencies": {
+    "chartjs-node-canvas": "latest",
     "@coral-xyz/anchor": "0.29.0",
     "@hono/node-server": "^1.11.3",
     "@hono/swagger-ui": "^0.3.0",
