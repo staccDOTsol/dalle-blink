@@ -65,7 +65,7 @@ const generateLeaderboardImage = async (data: any) => {
   ctx.fillText(`Leader: ${data.leader == null ? "Nobody yet.." : data.leader.toString().slice(0, 6)}..`, 50, 100);
   
   ctx.fillText(`Total $manifestoBurned: ${data.totalBurned}`, 50, 150);
-  ctx.fillText(`Leader will win ${data.totalSol} SOL..`, 50, 200);
+  ctx.fillText(`Leader will win ${data.totalSol / 10 ** 9} SOL..`, 50, 200);
   const timeLeftInSeconds = Math.max(0, Math.floor((data.endTime - Date.now()) / 1000));
   ctx.fillText(`..unless some1 else plays in ${Math.round(timeLeftInSeconds)} secs`, 50, 250);
 
@@ -260,10 +260,10 @@ app.openapi(
       icon: 'data:image/png;base64,' +  await generateLeaderboardImage(gameState),
       label: `FOMO3D Status`,
       title: `FOMO3D Status`,
-      description: `Total SOL: ${gameState.totalSol / 10 ** 9} SOL, Total Burned: ${gameState.totalBurned}, Leader: ${gameState.leader?.toString() || 'None'}, Time Left: ${(gameState.endTime - Date.now()) / 1000} seconds`,
+      description: `Total SOL: ${gameState.totalSol / 10 ** 9} SOL, Total Burned: ${gameState.totalBurned}, Leader: ${gameState.leader?.toString() || 'None'}, Time Left: ${(gameState.endTime - Date.now()) / 1000} seconds. Write this as a logical sentence, smash the button below and if nobody else plays in an hour you'll win the pot of ${gameState.totalSol / 10 ** 9} SOL!!!`,
       links: {
         actions: [{
-            label: `Play for ${(gameState.lastSol*2 + 1) / 10 ** 9} SOL`,
+            label: `Play for ${(gameState.lastSol*2) / 10 ** 9} SOL`,
             href: `/play`,
           }
         ]
