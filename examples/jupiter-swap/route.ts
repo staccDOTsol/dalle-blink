@@ -988,7 +988,7 @@ app.openapi(
       ))
     }
 
-    const transaction = await program.methods.buy(new BN(Number(Math.floor(Number(amount)*10**9) / candlestickData[candlestickData.length-1].close) ), new BN(maxSolCost)).accounts({
+    const transaction = await program.methods.buy(new BN(Number(Math.floor(Number(amount)) / candlestickData[candlestickData.length-1].close) ), new BN(maxSolCost)).accounts({
       global,
       feeRecipient,
       mint: mintPublicKey,
