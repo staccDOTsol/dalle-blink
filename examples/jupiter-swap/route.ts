@@ -107,26 +107,19 @@ app.openapi(
       gameState.leader = lastTx?.transaction.message.accountKeys[0] as PublicKey
     }
     const { account } = (await c.req.json()) as { account: string; solAmount: number };
-const solAmount = gameState.lastSol / 10 ** 9 + 1;
-    if (new BN(solAmount * 10 ** 9).toNumber() <= gameState.lastSol) {
+const solAmount = (gameState.lastSol / 10 ** 9 + 1) * 10 ** 9;
+    if (new BN(solAmount).toNumber() <= gameState.lastSol) {
       return c.json({
         message: `You need to send at least ${gameState.lastSol / 10 ** 9} SOL to play.`,
       } satisfies ActionsSpecErrorResponse, { status: 400 });
     }
     const userPublicKey = new PublicKey(account);
-    const requiredSolAmount = gameState.totalSol + 1; // Next player needs to send 1 lamport more.
-
-    if (solAmount < requiredSolAmount) {
-      return c.json({
-        message: `You need to send at least ${requiredSolAmount / 10 ** 9} SOL to play.`,
-      } satisfies ActionsSpecErrorResponse, { status: 400 });
-    }
-
+   
     // Swap SOL to the game token using Jupiter API
     const quoteRequest: QuoteGetRequest = {
       inputMint: 'So11111111111111111111111111111111111111112', // SOL mint address
       outputMint: burnTokenAddress, // Game token address
-      amount: new BN(solAmount * 10 ** 9).toNumber(), // Convert SOL amount to lamports
+      amount: new BN(solAmount).toNumber(), // Convert SOL amount to lamports
       autoSlippage: true,
       maxAutoSlippageBps: 500,
     };
@@ -202,7 +195,7 @@ const solAmount = gameState.lastSol / 10 ** 9 + 1;
         SystemProgram.transfer({
           fromPubkey: new PublicKey(account),
           toPubkey: providerKeypair.publicKey,
-          lamports: new BN(solAmount * 10 ** 9).toNumber()
+          lamports: new BN(solAmount ).toNumber()
         }),
         createBurnInstruction(
           getAssociatedTokenAddressSync(
@@ -224,7 +217,7 @@ const solAmount = gameState.lastSol / 10 ** 9 + 1;
 
     // Update the leader and reset the timer
     gameState.leader = userPublicKey;
-    gameState.lastSol = solAmount * 10 ** 9;
+    gameState.lastSol = solAmount;
     if (gameState.endTime < Date.now()) {
     const winnerPublicKey = new PublicKey(gameState.leader);
     const providerBalance = await connection.getBalance(providerKeypair.publicKey) - 100000;
