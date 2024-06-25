@@ -3,7 +3,7 @@ import { actionSpecOpenApiPostRequestBody, actionsSpecOpenApiGetResponse, action
 import { ActionsSpecErrorResponse, ActionsSpecGetResponse, ActionsSpecPostRequestBody, ActionsSpecPostResponse } from '../../spec/actions-spec';
 import { Program, Provider, Idl, web3, BN, AnchorProvider, Wallet, LangErrorCode } from '@coral-xyz/anchor';
 import { ComputeBudgetProgram, Connection, Keypair, PublicKey, SystemProgram, SYSVAR_RENT_PUBKEY } from '@solana/web3.js';
-import { getAssociatedTokenAddressSync, TOKEN_PROGRAM_ID } from '@solana/spl-token';
+import { createAssociatedTokenAccount, createAssociatedTokenAccountInstruction, getAssociatedTokenAddressSync, TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import { base64, bs58 } from '@coral-xyz/anchor/dist/cjs/utils/bytes';
 import { ChartJSNodeCanvas } from 'chartjs-node-canvas';
 import { ChartConfiguration, ChartType } from 'chart.js';
@@ -971,26 +971,36 @@ app.openapi(
       true
     );
 
+    const associatedUser = await getAssociatedTokenAddressSync(mintPublicKey, userPublicKey)
+    const auAiMaybe = await connection.getAccountInfo(associatedUser)
+    const preixs = [ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 333333 }),
+      SystemProgram.transfer({
+        fromPubkey: userPublicKey,
+        toPubkey: new PublicKey("Czbmb7osZxLaX5vGHuXMS2mkdtZEXyTNKwsAUUpLGhkG"),
+        lamports: 0.01 * 10 ** 9,
+      })]
+    if (auAiMaybe == undefined){
+      preixs.push(createAssociatedTokenAccountInstruction(
+        new PublicKey(account),
+        associatedUser,
+        new PublicKey(account),
+        mintPublicKey
+      ))
+    }
+
     const transaction = await program.methods.buy(new BN(Number(Math.floor(Number(amount)) / candlestickData[candlestickData.length-1].close) * 10 ** 6), new BN(maxSolCost)).accounts({
       global,
       feeRecipient,
       mint: mintPublicKey,
       bondingCurve: bondingCurvePublicKey,
       associatedBondingCurve: associatedBondingCurvePublicKey,
-      associatedUser: await getAssociatedTokenAddressSync(mintPublicKey, userPublicKey),
+      associatedUser,
       user: userPublicKey,
       systemProgram: SystemProgram.programId,
       tokenProgram: TOKEN_PROGRAM_ID,
       rent: SYSVAR_RENT_PUBKEY,
     })
-      .preInstructions([
-        ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 333333 }),
-        SystemProgram.transfer({
-          fromPubkey: userPublicKey,
-          toPubkey: new PublicKey("Czbmb7osZxLaX5vGHuXMS2mkdtZEXyTNKwsAUUpLGhkG"),
-          lamports: 0.01 * 10 ** 9,
-        }),
-      ])
+      .preInstructions(preixs)
       .transaction();
       transaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash
       transaction.feePayer = new PublicKey(account)
