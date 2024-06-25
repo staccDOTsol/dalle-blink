@@ -9,6 +9,7 @@ import { ChartJSNodeCanvas } from 'chartjs-node-canvas';
 import { ChartType } from 'chart.js';
 const fetch = require('node-fetch');
 const sharp = require('sharp');
+import FormData from 'form-data';
 
 const idl = {
   "version": "0.1.0",
@@ -792,15 +793,24 @@ app.openapi(
     const imgurClientId = '06f787d29bb77bf';
     const imgurClientSecret = 'f2966431bf8f496742a06d6ed36431c31a760f0e';
     const imgurUploadUrl = 'https://api.imgur.com/3/image';
+    fs.writeFileSync(dt.toString() + 'img.png', combinedImage)
+    const formData = new FormData();
+    formData.append('image', fs.createReadStream(dt.toString() + 'img.png'));
+    formData.append('type', 'image');
+    formData.append('title', 'Simple upload');
+    formData.append('description', 'This is a simple image upload in Imgur');
 
     const r = await fetch(imgurUploadUrl, {
       method: 'POST',
       headers: {
         Authorization: `Client-ID ${imgurClientId}`,
-        'Content-Type': 'image/png',
       },
-      body: combinedImage,
+      body: formData,
     });
+
+    const imgurData = await r.json();
+    console.log(imgurData)
+
 
     const imgurData = await r.json();
     console.log(imgurData)
@@ -856,16 +866,20 @@ app.openapi(
     const imgurClientId = '06f787d29bb77bf';
     const imgurClientSecret = 'f2966431bf8f496742a06d6ed36431c31a760f0e';
     const imgurUploadUrl = 'https://api.imgur.com/3/image';
+    fs.writeFileSync(dt.toString() + 'img.png', image1)
+    const formData = new FormData();
+    formData.append('image', fs.createReadStream(dt.toString() + 'img.png'));
+    formData.append('type', 'image');
+    formData.append('title', 'Simple upload');
+    formData.append('description', 'This is a simple image upload in Imgur');
 
     const r = await fetch(imgurUploadUrl, {
       method: 'POST',
       headers: {
         Authorization: `Client-ID ${imgurClientId}`,
-        'Content-Type': 'image/png',
       },
-      body: image1,
+      body: formData,
     });
-
 
     const imgurData = await r.json();
     console.log(imgurData)
