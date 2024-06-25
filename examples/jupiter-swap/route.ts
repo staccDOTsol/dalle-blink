@@ -773,7 +773,7 @@ const generateCandlestickChart = async (mint: any, candlestickData: any, data2?:
   };
   if (data2 != undefined){
     configuration.data.datasets.push({
-      label: 'Candlestick Data',
+      label: 'KOTH Data',
       data: data2,
       borderColor: 'rgba(75, 192, 192, 1)',
       borderWidth: 1,
