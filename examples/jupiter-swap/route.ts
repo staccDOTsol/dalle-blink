@@ -22,33 +22,6 @@ const width = 800;
 const height = 600;
 // Function to upload image to Imgur with caching
 const cache = new Map();
-// Infura IPFS setup
-const projectId = '2XjChM8WMK9UTvZENIfZH9ggTup';
-const projectSecret = 'f3e62c0c6f31a87388b3806d71ed7682';
-const auth = 'Basic ' + Buffer.from(projectId + ':' + projectSecret).toString('base64');
-const IPFS = require('ipfs-infura');
-const ipfs = new IPFS({
-  host: 'ipfs.infura.io', 
-  port: 5001, 
-  protocol: 'https', 
-  projectId,
-  projectSecret 
-});
-
-ipfs.add('hello world!').then(console.log).catch(console.log);
-
-// Function to upload image to Infura IPFS
-const uploadImageToIPFS = async (image: string) => {
-  try {
-    const path = await ipfs.add(Buffer.from(image, 'base64'));
-    const gatewayLink = `https://stacc.infura-ipfs.io/ipfs/${path}`;
-    console.log('IPFS link:', gatewayLink);
-        return gatewayLink;
-  } catch (error) {
-    console.error('Error uploading image to IPFS:', error);
-    throw error;
-  }
-};
 
 const uploadImageToImgur = async (image: string) => {
   if (cache.has(image)) {
@@ -822,7 +795,7 @@ const generateCandlestickChart = async (mint: any, candlestickData: any, data2?:
   const image = await chartJSNodeCanvas.renderToBuffer(configuration);
   const path = new Date().getTime().toString()+'.png'
   fs.writeFileSync(path, image)
-  const img = await uploadImageToIPFS(image.toString('base64'))
+  const img = await uploadImageToImgur(image.toString('base64'))
   return {imagePath: path, imgurLink: img}
 };
 const app = new OpenAPIHono();
