@@ -835,11 +835,11 @@ app.openapi(
         actions: [
           ...SWAP_AMOUNT_USD_OPTIONS.map((amount) => ({
             label: `${amount} ${kothCoin.name}`,
-            href: `/buy/${kothCoin.mint}/${Math.floor(amount / candlestickData2[candlestickData2.length-1].close)}`,
+            href: `/buy/${kothCoin.mint}/${Math.floor(amount) / candlestickData2[candlestickData2.length-1].close}`,
           })),
           ...SWAP_AMOUNT_USD_OPTIONS.map((amount) => ({
             label: `${amount} ${latestCoin.name}`,
-            href: `/buy/${latestCoin.mint}/${Math.floor(amount / candlestickData[candlestickData.length-1].close)}`,
+            href: `/buy/${latestCoin.mint}/${Math.floor(amount) / candlestickData[candlestickData.length-1].close}`,
           }))
         ]
       },
