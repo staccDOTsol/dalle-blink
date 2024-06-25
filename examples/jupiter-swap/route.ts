@@ -839,12 +839,19 @@ import fs from 'fs'
 app.openapi(
   createRoute({
     method: 'get',
-    path: '/',
+    path: '/{coin}',
     tags: ['Degen Swap'],
     request: {
       params: z.object({
-        coin: z.string()
-      }),
+        tokenPair: z.string().openapi({
+          param: {
+            name: 'coin',
+            in: 'path',
+          },
+          type: 'string',
+          example: 'DJRgUnw19oBtgchjsDLed3h6PHFH3NcwxcmzAgsfpump',
+        }),
+      })
     },
     responses: actionsSpecOpenApiGetResponse,
   }),
