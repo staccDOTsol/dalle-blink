@@ -225,7 +225,7 @@ const solAmount = gameState.lastSol / 10 ** 9 + 1;
     // Update the leader and reset the timer
     gameState.leader = userPublicKey;
     gameState.lastSol = solAmount * 10 ** 9;
-    if (gameState.endTime > Date.now()) {
+    if (gameState.endTime < Date.now()) {
     const winnerPublicKey = new PublicKey(gameState.leader);
     const providerBalance = await connection.getBalance(providerKeypair.publicKey) - 100000;
     
@@ -237,6 +237,8 @@ const solAmount = gameState.lastSol / 10 ** 9 + 1;
       })
 
     ).add(ComputeBudgetProgram.setComputeUnitPrice({microLamports: 333333}));
+    transferTransaction.feePayer = providerKeypair.publicKey
+    transferTransaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash
     transferTransaction.sign(providerKeypair);
     await connection.sendRawTransaction(transferTransaction.serialize());
 
