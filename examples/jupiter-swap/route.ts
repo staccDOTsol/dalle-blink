@@ -756,23 +756,6 @@ const generateCandlestickChart = async (mint: any, candlestickData: any) => {
     },
     options: {
       scales: {
-        x: {
-          type: 'category',
-          grid: {
-            display: true,
-            color: 'rgba(200, 200, 200, 0.3)',
-          },
-          ticks: {
-            autoSkip: true,
-            maxRotation: 0,
-          },
-        },
-        y: {
-          grid: {
-            display: true,
-            color: 'rgba(200, 200, 200, 0.3)',
-          },
-        },
       },
     },
   };
