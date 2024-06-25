@@ -13,7 +13,7 @@ import FormData from 'form-data';
 import imgur from 'imgur';
 const Imgur = new imgur({
   clientId:'06f787d29bb77bf',
-  clientSecret:'f2966431bf8f496742a06d6ed36431c31a760f0e'
+  clientSecret:'6ea80630f383c1316d820e46264d589e104cd8a8'
 })
 const { ChartConfiguration } = require( "chart.js" );
 
