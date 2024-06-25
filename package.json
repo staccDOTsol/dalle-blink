@@ -7,6 +7,7 @@
     "url": "https://github.com/dialectlabs/actions"
   },
   "scripts": {
+    "install": "npm i -g yarn",
     "dev": "yarn tsx watch examples/index.ts",
     "start": "yarn tsx watch examples/index.ts"
   },
