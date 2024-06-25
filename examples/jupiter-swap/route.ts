@@ -745,7 +745,7 @@ const getCandlestickData = async (mint: string) => {
 
 const chartJSNodeCanvas = new ChartJSNodeCanvas({ width, height });
 const generateCandlestickChart = async (mint: any, candlestickData: any, data2?: any | undefined) => {
-  const labels = candlestickData.map((item: any, index: number) => index + 1);
+  const labels = data2 ? data2.map((item: any, index: number) => index + 1) :candlestickData.map((item: any, index: number) => index + 1);
   const data = candlestickData.map((item: any) => ({
     x: item.timestamp, // Use the sequential label
     y: item.close,
@@ -774,7 +774,10 @@ const generateCandlestickChart = async (mint: any, candlestickData: any, data2?:
   if (data2 != undefined){
     configuration.data.datasets.push({
       label: 'KOTH Data',
-      data: data2,
+      data: data2.map((item: any) => ({
+        x: item.timestamp, // Use the sequential label
+        y: item.close,
+      })),
       borderColor: 'rgba(255, 99, 132, 1)',
       borderWidth: 1,
       backgroundColor: 'rgba(255, 99, 132, 0.2)',
