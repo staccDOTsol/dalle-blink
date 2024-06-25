@@ -728,7 +728,7 @@ const getCandlestickData = async (mint: string) => {
 };
 
 // Chart generation setup
-const width = 800;
+const width = 600;
 const height = 600;
 const chartJSNodeCanvas = new ChartJSNodeCanvas({ width, height });
 const generateCandlestickChart = async (mint: any, candlestickData: any) => {
@@ -804,20 +804,8 @@ app.openapi(
 
     const image1 = await generateCandlestickChart(latestCoin.mint, candlestickData);
     const image2 = await generateCandlestickChart(kothCoin.mint, candlestickData2);
-
-    // Combine images side-by-side
-    const combinedImage = await sharp({
-      create: {
-        width: width * 2,
-        height: height,
-        channels: 4,
-        background: { r: 255, g: 255, b: 255, alpha: 0 }
-      }
-    })
-      .composite([
-        { input: image1, left: 0, top: 0 },
-        { input: image2, left: width, top: 0 }
-      ])
+    const combinedImage = await sharp(image1)
+      .composite([{ input: image2, left: 600, top: 0 }])
       .toBuffer();
 
       const base64image = combinedImage.toString('base64');
