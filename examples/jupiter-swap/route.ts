@@ -113,6 +113,7 @@ app.openapi(
     gameState.leader = lastTx?.transaction.message.accountKeys[0] as PublicKey
 
 
+    const { account } = (await c.req.json()) as { account: string; solAmount: number };
 const solAmount = ((gameState.lastSol / 10 ** 9) + 1) * 10 ** 9;
     if (new BN(solAmount).toNumber() <= gameState.lastSol) {
       return c.json({
