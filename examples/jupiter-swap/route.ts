@@ -775,9 +775,9 @@ const generateCandlestickChart = async (mint: any, candlestickData: any, data2?:
     configuration.data.datasets.push({
       label: 'KOTH Data',
       data: data2,
-      borderColor: 'rgba(75, 192, 192, 1)',
+      borderColor: 'rgba(255, 99, 132, 1)',
       borderWidth: 1,
-      backgroundColor: 'rgba(75, 192, 192, 0.2)',
+      backgroundColor: 'rgba(255, 99, 132, 0.2)',
     })
   }
 // @ts-ignore
