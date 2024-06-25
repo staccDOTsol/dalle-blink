@@ -804,6 +804,8 @@ app.openapi(
     const image1 = fs.readFileSync(i1.imagePath)
 
     const image2 = fs.readFileSync(i2.imagePath)
+    const filePath = new Date().getTime().toString()+'.png'
+
     // Combine images side-by-side
     const combinedImage = await sharp({
       create: {
@@ -817,9 +819,8 @@ app.openapi(
         { input: image1, left: 0, top: 0 },
         { input: image2, left: width, top: 0 }
       ])
-      .toBuffer();
-
-      const base64image = combinedImage.toString('base64');
+      .toFile(filePath);
+      const base64image = fs.readFileSync(filePath).toString('base64');
       
     const r = await uploadImageToImgur(base64image)
 
