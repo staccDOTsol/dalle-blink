@@ -8,6 +8,7 @@
   },
   "scripts": {
     "dev": "tsx watch examples/index.ts",
+    "build": "npm i -g typescript",
     "start": "tsx watch examples/index.ts"
   },
   "dependencies": {
