@@ -814,54 +814,14 @@ app.openapi(
       links: {
         actions: [
           ...SWAP_AMOUNT_USD_OPTIONS.map((amount) => ({
-            label: `${amount}`,
+            label: `${amount} ${kothCoin.name}`,
             href: `/buy/${kothCoin.mint}/${amount}`,
           })),
           ...SWAP_AMOUNT_USD_OPTIONS.map((amount) => ({
-            label: `${amount}`,
+            label: `${amount} ${latestCoin.name}`,
             href: `/buy/${latestCoin.mint}/${amount}`,
-          })),
-          {
-            href: `/buy/${kothCoin.mint}/{${amountParameterName}}`,
-            label: `Buy ${kothCoin.name} or ${latestCoin.name}`,
-            parameters: [
-              {
-                name: amountParameterName,
-                label: 'Enter a custom USD amount',
-              },
-            ],
-          },
-          {
-            href: `/buy/${latestCoin.mint}/{${amountParameterName}}`,
-            label: `Buy ${kothCoin.name} or ${latestCoin.name}`,
-            parameters: [
-              {
-                name: amountParameterName,
-                label: 'Enter a custom USD amount',
-              },
-            ],
-          },
-          {
-            href: `/sell/${kothCoin.mint}/{${amountParameterName}}`,
-            label: `Sell ${kothCoin.name} or ${latestCoin.name}`,
-            parameters: [
-              {
-                name: amountParameterName,
-                label: 'Enter a custom USD amount',
-              },
-            ],
-          },
-          {
-            href: `/sell/${latestCoin.mint}/{${amountParameterName}}`,
-            label: `Sell ${kothCoin.name} or ${latestCoin.name}`,
-            parameters: [
-              {
-                name: amountParameterName,
-                label: 'Enter a custom USD amount',
-              },
-            ],
-          },
-        ],
+          }))
+        ]
       },
     };
 
