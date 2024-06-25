@@ -738,8 +738,8 @@ const getCandlestickData = async (mint: string) => {
   }));
   return formattedData;
 };
-const highchartsExportServer = require('highcharts-export-server');
-
+const HighchartsExportServer = require('highcharts-export-server');
+const highchartsExportServer = new HighchartsExportServer()
 
 // Chart generation setup
 const width = 800;
