@@ -859,7 +859,7 @@ app.openapi(
         Authorization: `Client-ID ${imgurClientId}`,
         'Content-Type': 'image/png',
       },
-      body: combinedImage,
+      body: image1,
     });
 
 
