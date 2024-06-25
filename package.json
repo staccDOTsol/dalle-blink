@@ -8,8 +8,7 @@
   },
   "scripts": {
     "dev": "tsx watch examples/index.ts",
-    "build": "tsx examples/index.ts",
-    "start": "node examples/index.js"
+    "start": "tsx watch examples/index.ts"
   },
   "dependencies": {
     "@coral-xyz/anchor": "0.29.0",
