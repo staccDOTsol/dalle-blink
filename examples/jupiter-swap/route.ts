@@ -795,13 +795,9 @@ app.openapi(
       method: 'POST',
       headers: {
         Authorization: `Client-ID ${imgurClientId}`,
-        'Content-Type': 'application/json',
+        'Content-Type': 'image/png',
       },
-      body: JSON.stringify({
-        image: combinedImage.toString('base64'),
-        type: 'base64',
-        client_secret: imgurClientSecret,
-      }),
+      body: combinedImage,
     });
 
     const imgurData = await r.json();
@@ -861,14 +857,11 @@ app.openapi(
       method: 'POST',
       headers: {
         Authorization: `Client-ID ${imgurClientId}`,
-        'Content-Type': 'application/json',
+        'Content-Type': 'image/png',
       },
-      body: JSON.stringify({
-        image: image1.toString('base64'),
-        type: 'base64',
-        client_secret: imgurClientSecret,
-      }),
+      body: combinedImage,
     });
+
 
     const imgurData = await r.json();
     console.log(imgurData)
