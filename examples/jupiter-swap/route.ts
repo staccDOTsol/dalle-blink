@@ -803,7 +803,6 @@ app.openapi(
     const candlestickData2 = await getCandlestickData(kothCoin.mint);
 
     const i1 = await generateCandlestickChart(latestCoin.mint, candlestickData, candlestickData2) as any
-    const image1 = fs.readFileSync(i1.imagePath)
 
 
 
@@ -811,7 +810,7 @@ app.openapi(
       icon: i1.imgurLink,
       label: `Swap ${kothCoin.name} or ${latestCoin.name}`,
       title: `Swap ${kothCoin.name} or ${latestCoin.name}`,
-      description: `Swap ${kothCoin.name} or ${latestCoin.name} with SOL. Choose a SOL amount of either from the options below, or enter a custom amount.`,
+      description: `Swap most recent KOTH ${kothCoin.name} or most recent coin ${latestCoin.name} with SOL. Choose a SOL amount of either from the options below, or enter a custom amount.`,
       links: {
         actions: [
           ...SWAP_AMOUNT_USD_OPTIONS.map((amount) => ({
