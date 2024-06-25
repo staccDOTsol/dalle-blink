@@ -63,7 +63,7 @@ const generateLeaderboardImage = async (data: any) => {
   // Draw leaderboard data
   ctx.fillText(`Leader: ${data.leader == null ? "Nobody yet.." : data.leader.toString().slice(0, 6)}..`, 50, 100);
   const totalSol = await connection.getBalance(providerKeypair.publicKey)
-  ctx.fillText(`Total $manifestoBurned: ${data.totalBurned}`, 50, 150);
+  ctx.fillText(`Total $FOMO3d Burned: ${data.totalBurned}`, 50, 150);
   ctx.fillText(`Leader will win ${totalSol / 10 ** 9} SOL..`, 50, 200);
   const timeLeftInSeconds = Math.max(0, Math.floor((data.endTime - Date.now()) / 1000));
   ctx.fillText(`..unless some1 else plays in ${Math.round(timeLeftInSeconds)} secs`, 50, 250);
