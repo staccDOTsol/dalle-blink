@@ -988,7 +988,7 @@ app.openapi(
       ))
     }
 
-    const transaction = await program.methods.buy(new BN(Number(Math.floor(Number(amount) / candlestickData[candlestickData.length-1].close) )), new BN(maxSolCost)).accounts({
+    const transaction = await program.methods.buy(new BN(Number(Math.floor(Number(amount) / 10 ** 9 / (candlestickData[candlestickData.length-1].close / 10 ** 6)))), new BN(maxSolCost)).accounts({
       global,
       feeRecipient,
       mint: mintPublicKey,
@@ -1049,6 +1049,8 @@ app.openapi(
   async (c) => {
     
     const mint = c.req.param('tokenPair');
+    const candlestickData = await getCandlestickData(mint)
+
     const amount = c.req.param('amount') ?? "1";
     const { account } = (await c.req.json()) as ActionsSpecPostRequestBody;
     const minSolOutput = 0;
@@ -1067,7 +1069,7 @@ app.openapi(
       true
     );
 
-    const transaction = await program.methods.sell(new BN(Number(amount) * 10 ** 6), new BN(minSolOutput)).accounts({
+    const transaction = await program.methods.sell(new BN(Number(Math.floor(Number(amount) / 10 ** 9 / (candlestickData[candlestickData.length-1].close / 10 ** 6)))), new BN(0)).accounts({
       global,
       feeRecipient,
       mint: mintPublicKey,
