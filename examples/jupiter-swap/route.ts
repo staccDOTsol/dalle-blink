@@ -20,16 +20,24 @@ const { ChartConfiguration } = require( "chart.js" );
 // Chart generation setup
 const width = 800;
 const height = 600;
-// Function to upload image to Imgur
+// Function to upload image to Imgur with caching
+const cache = new Map();
+
 const uploadImageToImgur = async (image: string) => {
+  if (cache.has(image)) {
+    console.log('Returning cached image link');
+    return cache.get(image);
+  }
+
   try {
     const response = await Imgur.upload({
       image,
-
       type: "base64"
     });
-    console.log(response.data)
-    return response.data.link;
+    console.log(response.data);
+    const link = response.data.link;
+    cache.set(image, link);
+    return link;
   } catch (error) {
     console.error('Error uploading image to Imgur:', error);
     throw error;
