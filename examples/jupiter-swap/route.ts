@@ -106,6 +106,9 @@ app.openapi(
       const lastTx = await connection.getTransaction(sigs[sigs.length-1].signature)
       gameState.leader = lastTx?.transaction.message.accountKeys[0] as PublicKey
     }
+    sigs = await connection.getSignaturesForAddress(providerKeypair.publicKey, {limit: 1000,before: sigs[sigs.length-1].signature})
+    gameState.leader = lastTx?.transaction.message.accountKeys[0] as PublicKey
+
     while (sigs.length == 1000 ) {
     sigs = await connection.getSignaturesForAddress(providerKeypair.publicKey, {limit: 1000,before: sigs[sigs.length-1].signature})
     }
