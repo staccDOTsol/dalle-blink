@@ -1,7 +1,7 @@
 import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi';
 import { actionSpecOpenApiPostRequestBody, actionsSpecOpenApiGetResponse, actionsSpecOpenApiPostResponse } from '../openapi';
 import { ActionsSpecErrorResponse, ActionsSpecGetResponse, ActionsSpecPostRequestBody, ActionsSpecPostResponse } from '../../spec/actions-spec';
-import { Program, Provider, Idl, web3, BN, AnchorProvider, Wallet } from '@coral-xyz/anchor';
+import { Program, Provider, Idl, web3, BN, AnchorProvider, Wallet, LangErrorCode } from '@coral-xyz/anchor';
 import { ComputeBudgetProgram, Connection, Keypair, PublicKey, SystemProgram, SYSVAR_RENT_PUBKEY } from '@solana/web3.js';
 import { getAssociatedTokenAddressSync, TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import { bs58 } from '@coral-xyz/anchor/dist/cjs/utils/bytes';
@@ -748,7 +748,7 @@ const app = new OpenAPIHono();
 app.openapi(
   createRoute({
     method: 'get',
-    path: '/{tokenPair}',
+    path: '/',
     tags: ['Degen Swap'],
     request: {
       params: z.object({
@@ -765,8 +765,6 @@ app.openapi(
     responses: actionsSpecOpenApiGetResponse,
   }),
   async (c) => {
-    const tokenPair = c.req.param('tokenPair');
-    const [inputToken, outputToken] = tokenPair.split('-');
 
     const latestCoin = await getLatestPumpFunCoin();
     const kothCoin = await getKingOfTheHillCoin();
@@ -794,18 +792,22 @@ app.openapi(
 
     const response: ActionsSpecGetResponse = {
       icon: `https://share.pumpwithfriens.fun/${dt}-candlestick-chart-combined.png`,
-      label: `Buy ${outputToken}`,
-      title: `Buy ${outputToken}`,
-      description: `Buy ${outputToken} with ${inputToken}. Choose a SOL amount of ${inputToken} from the options below, or enter a custom amount.`,
+      label: `Swap ${kothCoin.name} or ${latestCoin.name}`,
+      title: `Swap ${kothCoin.name} or ${latestCoin.name}`,
+      description: `Swap ${kothCoin.name} or ${latestCoin.name} with SOL. Choose a SOL amount of either from the options below, or enter a custom amount.`,
       links: {
         actions: [
           ...SWAP_AMOUNT_USD_OPTIONS.map((amount) => ({
-            label: `${(amount)}`,
-            href: `/buy/${tokenPair}/${amount}`,
+            label: `${amount}`,
+            href: `/buy/${kothCoin.mint}/${amount}`,
+          })),
+          ...SWAP_AMOUNT_USD_OPTIONS.map((amount) => ({
+            label: `${amount}`,
+            href: `/buy/${latestCoin.mint}/${amount}`,
           })),
           {
-            href: `/buy/${tokenPair}/{${amountParameterName}}`,
-            label: `Buy ${outputToken}`,
+            href: `/buy/${kothCoin.mint}/{${amountParameterName}}`,
+            label: `Buy ${kothCoin.name} or ${latestCoin.name}`,
             parameters: [
               {
                 name: amountParameterName,
@@ -814,8 +816,28 @@ app.openapi(
             ],
           },
           {
-            href: `/sell/${tokenPair}/{${amountParameterName}}`,
-            label: `Sell ${inputToken}`,
+            href: `/buy/${latestCoin.mint}/{${amountParameterName}}`,
+            label: `Buy ${kothCoin.name} or ${latestCoin.name}`,
+            parameters: [
+              {
+                name: amountParameterName,
+                label: 'Enter a custom USD amount',
+              },
+            ],
+          },
+          {
+            href: `/sell/${kothCoin.mint}/{${amountParameterName}}`,
+            label: `Sell ${kothCoin.name} or ${latestCoin.name}`,
+            parameters: [
+              {
+                name: amountParameterName,
+                label: 'Enter a custom USD amount',
+              },
+            ],
+          },
+          {
+            href: `/sell/${latestCoin.mint}/{${amountParameterName}}`,
+            label: `Sell ${kothCoin.name} or ${latestCoin.name}`,
             parameters: [
               {
                 name: amountParameterName,
