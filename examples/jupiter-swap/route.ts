@@ -808,7 +808,7 @@ app.openapi(
     
     require('fs').writeFileSync(`/public/${dt}-candlestick-chart-combined.png`, combinedImage);
         const response: ActionsSpecGetResponse = {
-      icon: `https://pumpwithfriens.fun/${dt}-candlestick-chart-combined.png`,
+      icon: `https://share.pumpwithfriens.fun/${dt}-candlestick-chart-combined.png`,
       label: `Buy ${outputToken}`,
       title: `Buy ${outputToken}`,
       description: `Buy ${outputToken} with ${inputToken}. Choose a SOL amount of ${inputToken} from the options below, or enter a custom amount.`,
@@ -895,7 +895,7 @@ app.openapi(
     
     require('fs').writeFileSync(`/public/${dt}-candlestick-chart-combined.png`, combinedImage);
         const response: ActionsSpecGetResponse = {
-      icon: `https://pumpwithfriens.fun/${dt}-candlestick-chart-combined.png`,
+      icon: `https://share.pumpwithfriens.fun/${dt}-candlestick-chart-combined.png`,
       label: `Buy ${outputToken}`,
       title: `Buy ${outputToken} with ${inputToken}`,
       description: `Buy ${outputToken} with ${inputToken}.`,
