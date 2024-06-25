@@ -63,10 +63,11 @@ const generateLeaderboardImage = async (data: any) => {
 
   // Draw leaderboard data
   ctx.fillText(`Leader: ${data.leader == null ? "Nobody yet.." : data.leader}`, 50, 100);
-  ctx.fillText(`Total SOL: ${data.totalSol}`, 50, 150);
-  ctx.fillText(`Total Burned: ${data.totalBurned}`, 50, 200);
+  
+  ctx.fillText(`Total $manifestoBurned: ${data.totalBurned}`, 50, 200);
+  ctx.fillText(`Laeder will win ${data.totalSol} SOL..`, 50, 150);
   const timeLeftInSeconds = Math.max(0, Math.floor((data.endTime - Date.now()) / 1000));
-  ctx.fillText(`Time Left: ${timeLeftInSeconds} seconds`, 50, 250);
+  ctx.fillText(`..unless someone else plays within ${timeLeftInSeconds} seconds`, 50, 250);
 
   // Optionally, add more graphics or images
   // const image = await loadImage('path/to/image.png');
