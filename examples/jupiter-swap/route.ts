@@ -4,12 +4,31 @@ import { ActionsSpecErrorResponse, ActionsSpecGetResponse, ActionsSpecPostReques
 import { Program, Provider, Idl, web3, BN, AnchorProvider, Wallet, LangErrorCode } from '@coral-xyz/anchor';
 import { ComputeBudgetProgram, Connection, Keypair, PublicKey, SystemProgram, SYSVAR_RENT_PUBKEY } from '@solana/web3.js';
 import { getAssociatedTokenAddressSync, TOKEN_PROGRAM_ID } from '@solana/spl-token';
-import { bs58 } from '@coral-xyz/anchor/dist/cjs/utils/bytes';
+import { base64, bs58 } from '@coral-xyz/anchor/dist/cjs/utils/bytes';
 import { ChartJSNodeCanvas } from 'chartjs-node-canvas';
 import { ChartType } from 'chart.js';
 const fetch = require('node-fetch');
 const sharp = require('sharp');
 import FormData from 'form-data';
+import imgur from 'imgur';
+const Imgur = new imgur({
+  clientId:'06f787d29bb77bf',
+  clientSecret:'f2966431bf8f496742a06d6ed36431c31a760f0e'
+})
+
+// Function to upload image to Imgur
+const uploadImageToImgur = async (image: string) => {
+  try {
+    const response = await Imgur.upload({
+      image
+    });
+    console.log(response.data)
+    return response.data.link;
+  } catch (error) {
+    console.error('Error uploading image to Imgur:', error);
+    throw error;
+  }
+};
 
 const idl = {
   "version": "0.1.0",
@@ -789,32 +808,15 @@ app.openapi(
         { input: image2, left: width, top: 0 }
       ])
       .toBuffer();
+
+      const base64image = combinedImage.toString('base64');
       
-    const imgurClientId = '06f787d29bb77bf';
-    const imgurClientSecret = 'f2966431bf8f496742a06d6ed36431c31a760f0e';
-    const imgurUploadUrl = 'https://api.imgur.com/3/image';
-    fs.writeFileSync(dt.toString() + 'img.png', combinedImage)
-    const formData = new FormData();
-    formData.append('image', fs.createReadStream(dt.toString() + 'img.png'));
-    formData.append('type', 'image');
-    formData.append('title', 'Simple upload');
-    formData.append('description', 'This is a simple image upload in Imgur');
-
-    const r = await fetch(imgurUploadUrl, {
-      method: 'POST',
-      headers: {
-        Authorization: `Client-ID ${imgurClientId}`,
-      },
-      body: formData,
-    });
-
-    const imgurData = await r.json();
-    console.log(imgurData)
+    const r = await uploadImageToImgur(base64image)
 
 
-    const filePath = imgurData.data.link;
+
     const response: ActionsSpecGetResponse = {
-      icon: filePath,
+      icon: r,
       label: `Swap ${kothCoin.name} or ${latestCoin.name}`,
       title: `Swap ${kothCoin.name} or ${latestCoin.name}`,
       description: `Swap ${kothCoin.name} or ${latestCoin.name} with SOL. Choose a SOL amount of either from the options below, or enter a custom amount.`,
@@ -868,31 +870,16 @@ app.openapi(
     if (!fs.existsSync(publicDir)) {
       fs.mkdirSync(publicDir);
     }
-    const imgurClientId = '06f787d29bb77bf';
-    const imgurClientSecret = 'f2966431bf8f496742a06d6ed36431c31a760f0e';
-    const imgurUploadUrl = 'https://api.imgur.com/3/image';
-    fs.writeFileSync(dt.toString() + 'img.png', image1)
-    const formData = new FormData();
-    formData.append('image', fs.createReadStream(dt.toString() + 'img.png'));
-    formData.append('type', 'image');
-    formData.append('title', 'Simple upload');
-    formData.append('description', 'This is a simple image upload in Imgur');
 
-    const r = await fetch(imgurUploadUrl, {
-      method: 'POST',
-      headers: {
-        Authorization: `Client-ID ${imgurClientId}`,
-      },
-      body: formData,
-    });
+    const base64image = image1.toString('base64');
+    
+  const r = await uploadImageToImgur(base64image)
 
-    const imgurData = await r.json();
-    console.log(imgurData)
 
-    const filePath = imgurData.data.link;
-    const coin = await(await fetch("https://frontend-api.pump.fun/coins/"+mint)).json()
-    const response: ActionsSpecGetResponse = {
-      icon: filePath,
+  const coin = await(await fetch("https://frontend-api.pump.fun/coins/"+mint)).json()
+
+  const response: ActionsSpecGetResponse = {
+    icon: r,
       label: `Swap ${coin.name}`,
       title: `Swap ${coin.name}`,
       description: `Swap ${coin.name} with SOL. Choose a SOL amount of either from the options below, or enter a custom amount.`,
