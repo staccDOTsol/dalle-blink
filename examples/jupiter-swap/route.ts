@@ -268,7 +268,7 @@ app.openapi(
       description: `Total SOL: ${gameState.totalSol / 10 ** 9} SOL, Total Burned: ${gameState.totalBurned}, Leader: ${gameState.leader?.toString() || 'None'}, Time Left: ${(gameState.endTime - Date.now()) / 1000} seconds`,
       links: {
         actions: [{
-            label: `Play for ${(gameState.lastSol + 1) / 10 ** 9} SOL`,
+            label: `Play for ${(gameState.lastSol*2 + 1) / 10 ** 9} SOL`,
             href: `/play`,
           }
         ]
