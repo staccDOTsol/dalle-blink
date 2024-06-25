@@ -67,7 +67,7 @@ const generateLeaderboardImage = async (data: any) => {
   ctx.fillText(`Total $manifestoBurned: ${data.totalBurned}`, 50, 200);
   ctx.fillText(`Laeder will win ${data.totalSol} SOL..`, 50, 150);
   const timeLeftInSeconds = Math.max(0, Math.floor((data.endTime - Date.now()) / 1000));
-  ctx.fillText(`..unless someone else plays within ${timeLeftInSeconds} seconds`, 50, 250);
+  ctx.fillText(`..unless some1 else plays in ${Math.round(timeLeftInSeconds)} secs`, 50, 250);
 
   // Optionally, add more graphics or images
   // const image = await loadImage('path/to/image.png');
