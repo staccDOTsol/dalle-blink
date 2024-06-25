@@ -812,8 +812,6 @@ app.openapi(
     console.log(imgurData)
 
 
-    const imgurData = await r.json();
-    console.log(imgurData)
     const filePath = imgurData.data.link;
     const response: ActionsSpecGetResponse = {
       icon: filePath,
