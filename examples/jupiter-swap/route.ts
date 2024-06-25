@@ -787,18 +787,27 @@ app.openapi(
       ])
       .toBuffer();
       
-    // Ensure the public directory exists
-    const publicDir = path.join(__dirname, '..', 'public');
-    if (!fs.existsSync(publicDir)) {
-      fs.mkdirSync(publicDir);
-    }
+    const imgurClientId = '06f787d29bb77bf';
+    const imgurClientSecret = 'f2966431bf8f496742a06d6ed36431c31a760f0e';
+    const imgurUploadUrl = 'https://api.imgur.com/3/image';
 
-    // Save the file to the public directory
-    const filePath = path.join(publicDir, `${dt}-candlestick-chart-combined.png`);
-    fs.writeFileSync(filePath, combinedImage);
+    const r = await fetch(imgurUploadUrl, {
+      method: 'POST',
+      headers: {
+        Authorization: `Client-ID ${imgurClientId}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        image: combinedImage.toString('base64'),
+        type: 'base64',
+        client_secret: imgurClientSecret,
+      }),
+    });
 
+    const imgurData = await r.json();
+    const filePath = imgurData.data.link;
     const response: ActionsSpecGetResponse = {
-      icon: `https://stacc-actions2-7ff4c9084f2e.herokuapp.com/public/${dt}-candlestick-chart-combined.png`,
+      icon: filePath,
       label: `Swap ${kothCoin.name} or ${latestCoin.name}`,
       title: `Swap ${kothCoin.name} or ${latestCoin.name}`,
       description: `Swap ${kothCoin.name} or ${latestCoin.name} with SOL. Choose a SOL amount of either from the options below, or enter a custom amount.`,
@@ -883,14 +892,28 @@ app.openapi(
     if (!fs.existsSync(publicDir)) {
       fs.mkdirSync(publicDir);
     }
+    const imgurClientId = '06f787d29bb77bf';
+    const imgurClientSecret = 'f2966431bf8f496742a06d6ed36431c31a760f0e';
+    const imgurUploadUrl = 'https://api.imgur.com/3/image';
 
-    // Save the file to the public directory
-    const filePath = path.join(publicDir, `${dt}-candlestick-chart-combined.png`);
-    fs.writeFileSync(filePath, image1);
+    const r = await fetch(imgurUploadUrl, {
+      method: 'POST',
+      headers: {
+        Authorization: `Client-ID ${imgurClientId}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        image: image1.toString('base64'),
+        type: 'base64',
+        client_secret: imgurClientSecret,
+      }),
+    });
 
+    const imgurData = await r.json();
+    const filePath = imgurData.data.link;
     const coin = await(await fetch("https://frontend-api.pump.fun/coins/"+mint)).json()
     const response: ActionsSpecGetResponse = {
-      icon: `https://stacc-actions2-7ff4c9084f2e.herokuapp.com/public/${dt}-candlestick-chart-combined.png`,
+      icon: filePath,
       label: `Swap ${coin.name}`,
       title: `Swap ${coin.name}`,
       description: `Swap ${coin.name} with SOL. Choose a SOL amount of either from the options below, or enter a custom amount.`,
