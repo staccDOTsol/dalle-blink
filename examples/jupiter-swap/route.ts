@@ -5,7 +5,8 @@ import { Program, Provider, Idl, web3, BN, AnchorProvider, Wallet, LangErrorCode
 import { ComputeBudgetProgram, Connection, Keypair, PublicKey, SystemProgram, SYSVAR_RENT_PUBKEY } from '@solana/web3.js';
 import { getAssociatedTokenAddressSync, TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import { bs58 } from '@coral-xyz/anchor/dist/cjs/utils/bytes';
-const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
+import { ChartJSNodeCanvas } from 'chartjs-node-canvas';
+import { ChartType } from 'chart.js';
 const fetch = require('node-fetch');
 const sharp = require('sharp');
 
@@ -710,6 +711,7 @@ const chartJSNodeCanvas = new ChartJSNodeCanvas({ width, height });
 const generateCandlestickChart = async (mint: any) => {
   const candlestickData = await getCandlestickData(mint);
 
+
   const labels = candlestickData.map((item: any) => new Date(item.timestamp * 1000).toLocaleDateString());
   const data = candlestickData.map((item: any) => ({
     x: new Date(item.timestamp * 1000),
@@ -720,11 +722,15 @@ const generateCandlestickChart = async (mint: any) => {
   }));
 
   const configuration = {
-    type: 'candlestick',
+    type: 'line',
     data: {
+      labels: labels,
       datasets: [{
         label: 'Candlestick Data',
-        data: data,
+        data: data.map(item => item.c), // Use closing prices for the line chart
+        borderColor: 'rgba(75, 192, 192, 1)',
+        borderWidth: 1,
+        fill: false,
       }],
     },
     options: {
@@ -738,7 +744,7 @@ const generateCandlestickChart = async (mint: any) => {
       },
     },
   };
-
+// @ts-ignore
   const image = await chartJSNodeCanvas.renderToBuffer(configuration);
   return image;
 };
@@ -751,7 +757,7 @@ app.openapi(
     path: '/',
     tags: ['Degen Swap'],
     request: {
-      
+
     },
     responses: actionsSpecOpenApiGetResponse,
   }),
