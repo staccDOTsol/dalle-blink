@@ -892,22 +892,22 @@ app.openapi(
             href: `/buy/${coin.mint}/${amount}`,
           })),
           {
-            href: `/buy/${coin.mint}/{${amountParameterName}}`,
+            href: `/buy/${coin.mint}/{${Math.floor(Number(amountParameterName) / candlestickData[candlestickData.length-1].close)}`,
             label: `Buy ${coin.name}`,
             parameters: [
               {
                 name: amountParameterName,
-                label: 'Enter a custom USD amount',
+                label: 'Enter a custom SOL amount',
               },
             ],
           },
           {
-            href: `/sell/${coin.mint}/{${amountParameterName}}`,
+            href: `/sell/${coin.mint}/{${Math.floor(Number(amountParameterName) / candlestickData[candlestickData.length-1].close)}`,
             label: `Sell ${coin.name}`,
             parameters: [
               {
                 name: amountParameterName,
-                label: 'Enter a custom USD amount',
+                label: 'Enter a custom SOL amount',
               },
             ],
           },
