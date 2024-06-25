@@ -728,7 +728,7 @@ const getCandlestickData = async (mint: string) => {
 };
 
 // Chart generation setup
-const width = 600;
+const width = 800;
 const height = 600;
 const chartJSNodeCanvas = new ChartJSNodeCanvas({ width, height });
 const generateCandlestickChart = async (mint: any, candlestickData: any) => {
@@ -756,6 +756,23 @@ const generateCandlestickChart = async (mint: any, candlestickData: any) => {
     },
     options: {
       scales: {
+        x: {
+          type: 'category',
+          grid: {
+            display: true,
+            color: 'rgba(200, 200, 200, 0.3)',
+          },
+          ticks: {
+            autoSkip: true,
+            maxRotation: 0,
+          },
+        },
+        y: {
+          grid: {
+            display: true,
+            color: 'rgba(200, 200, 200, 0.3)',
+          },
+        },
       },
     },
   };
@@ -787,8 +804,20 @@ app.openapi(
 
     const image1 = await generateCandlestickChart(latestCoin.mint, candlestickData);
     const image2 = await generateCandlestickChart(kothCoin.mint, candlestickData2);
-    const combinedImage = await sharp(image1)
-      .composite([{ input: image2, left: 600, top: 0 }])
+
+    // Combine images side-by-side
+    const combinedImage = await sharp({
+      create: {
+        width: width * 2,
+        height: height,
+        channels: 4,
+        background: { r: 255, g: 255, b: 255, alpha: 0 }
+      }
+    })
+      .composite([
+        { input: image1, left: 0, top: 0 },
+        { input: image2, left: width, top: 0 }
+      ])
       .toBuffer();
 
       const base64image = combinedImage.toString('base64');
@@ -806,11 +835,11 @@ app.openapi(
         actions: [
           ...SWAP_AMOUNT_USD_OPTIONS.map((amount) => ({
             label: `${amount} ${kothCoin.name}`,
-            href: `/buy/${kothCoin.mint}/${Math.floor(amount) / candlestickData2[candlestickData2.length-1].close}`,
+            href: `/buy/${kothCoin.mint}/${amount}`,
           })),
           ...SWAP_AMOUNT_USD_OPTIONS.map((amount) => ({
             label: `${amount} ${latestCoin.name}`,
-            href: `/buy/${latestCoin.mint}/${Math.floor(amount) / candlestickData[candlestickData.length-1].close}`,
+            href: `/buy/${latestCoin.mint}/${amount}`,
           }))
         ]
       },
@@ -869,10 +898,11 @@ app.openapi(
         actions: [
           ...SWAP_AMOUNT_USD_OPTIONS.map((amount) => ({
             label: `${amount}`,
-            href: `/buy/${coin.mint}/${amount / candlestickData[candlestickData.length-1].close}`,
+            href: `/buy/${coin.mint}/${amount}`,
           })),
           {
-            href: `/buy/${coin.mint}/${Math.floor(Number.isNaN(Number(amountParameterName)) ? 0 : Number(amountParameterName) / candlestickData[candlestickData.length-1].close)}`,
+            href: `/buy/${coin.mint}/{${amountParameterName}}`,
+
             label: `Buy ${coin.name}`,
             parameters: [
               {
@@ -882,7 +912,7 @@ app.openapi(
             ],
           },
           {
-            href: `/sell/${coin.mint}/${isNaN(Number(amountParameterName)) ? 0 : Math.floor(Number(amountParameterName) / candlestickData[candlestickData.length-1].close)}`,
+            href: `/sell/${coin.mint}/{${amountParameterName}}`,
             label: `Sell ${coin.name}`,
             parameters: [
               {
@@ -935,6 +965,8 @@ app.openapi(
   async (c) => {
     
     const mint = c.req.param('tokenPair');
+    const candlestickData = await getCandlestickData(mint)
+    
     const amount = c.req.param('amount') ?? "1";
     const { account } = (await c.req.json()) as ActionsSpecPostRequestBody;
     const maxSolCost = Number.MAX_SAFE_INTEGER;
@@ -952,7 +984,7 @@ app.openapi(
       true
     );
 
-    const transaction = await program.methods.buy(new BN(Number(amount) * 10 ** 6), new BN(maxSolCost)).accounts({
+    const transaction = await program.methods.buy(new BN(Number(Math.floor(Number(amount)) / candlestickData[candlestickData.length-1].close) * 10 ** 6), new BN(maxSolCost)).accounts({
       global,
       feeRecipient,
       mint: mintPublicKey,
