@@ -743,49 +743,41 @@ const highchartsExportServer = require('highcharts-export-server');
 // Chart generation setup
 const width = 800;
 const height = 600;
-const chartJSNodeCanvas = new ChartJSNodeCanvas({ width, height });
-
-// Function to generate chart image
-const generateCandlestickChart = async (mint: any, data: any) => {
   const exporter = require('highcharts-export-server');
 
-  // Chart configuration
+
+
+highchartsExportServer.initPool();
+// Function to generate chart image
+const generateCandlestickChart = async (mint: any, data: any) => {
+
   const chartConfig = {
-      chart: {
-          type: 'candlestick',
-      },
-      title: {
-          text: 'Candlestick Chart',
-      },
-      xAxis: {
-          type: 'datetime',
-      },
-      series: [{
-          name: 'Price',
-          data: data.map(d => [d.timestamp * 1000, d.open, d.high, d.low, d.close]),
-          tooltip: {
-              valueDecimals: 2
-          }
-      }]
-  };
-
-  // Export settings
-  const exportSettings = {
-      export: {
-          type: 'png',
-          options: chartConfig,
+    chart: {
+      type: 'candlestick',
+    },
+    title: {
+      text: 'Candlestick Chart',
+    },
+    xAxis: {
+      type: 'datetime',
+    },
+    series: [{
+      name: 'Price',
+      data: data.map(d => [d.timestamp * 1000, d.open, d.high, d.low, d.close]),
+      tooltip: {
+        valueDecimals: 2
       }
+    }]
   };
 
-  // Set the new options and merge it with the default options
-  const options = exporter.setOptions(exportSettings);
+  const exportSettings = {
+    type: 'png',
+    options: chartConfig,
+  };
 
-  // Initialize a pool of workers
-  await exporter.initPool(options);
+  return new Promise((resolve, reject) => {
+    highchartsExportServer.export(exportSettings, async (err, res) => {
 
-  // Perform an export
-  return await new Promise((resolve, reject) => {
-      exporter.startExport(exportSettings, async (res, err) => {
           if (err) {
               console.error('Error generating chart:', err);
               reject(err);

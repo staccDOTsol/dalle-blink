@@ -9,15 +9,15 @@
   "scripts": {
     "install": "npm i -g yarn",
     "dev": "yarn tsx watch examples/index.ts",
-    "start": "yarn tsx watch examples/index.ts",       "postinstall": "puppeteer install && npx puppeteer browsers install chrome"
+    "start": "yarn tsx watch examples/index.ts",       "postinstall": "puppeteer install"
 
   },
   "dependencies": {
     "@coral-xyz/anchor": "0.29.0",
     "@hono/node-server": "^1.11.3",
-    "@hono/swagger-ui": "^0.3.0",
-    "highcharts-export-server": "latest",       "puppeteer": "^21.0.0",
-
+    "@hono/swagger-ui": "^0.3.0",    "highcharts-export-server": "^2.0.0",
+    "puppeteer": "^21.0.0",
+    "express": "^4.17.1",
     "@hono/zod-openapi": "^0.14.5",
     "@jup-ag/api": "^6.0.23",
     "@solana/spl-token": "^0.4.7",
