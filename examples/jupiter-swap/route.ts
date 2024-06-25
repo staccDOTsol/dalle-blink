@@ -853,6 +853,66 @@ app.openapi(
 
 app.openapi(
   createRoute({
+    method: 'get',
+    path: '/coins/',
+    tags: ['Degen Swap'],
+    request: {
+      params: z.object({
+        coin: z.string()
+      }),
+    },
+    responses: actionsSpecOpenApiGetResponse,
+  }),
+  async (c) => {
+    const mint = c.req.param('coin');
+    const amountParameterName = 'amount';
+    const dt = new Date().getTime();
+    const image1 = await generateCandlestickChart(mint);
+
+    require('fs').writeFileSync(`/public/${dt}-candlestick-chart-combined.png`, image1);
+    const coin = await(await fetch("https://frontend-api.pump.fun/coins/"+mint)).json()
+    const response: ActionsSpecGetResponse = {
+      icon: `https://share.pumpwithfriens.fun/${dt}-candlestick-chart-combined.png`,
+      label: `Swap ${coin.name}`,
+      title: `Swap ${coin.name}`,
+      description: `Swap ${coin.name} with SOL. Choose a SOL amount of either from the options below, or enter a custom amount.`,
+      links: {
+        actions: [
+          ...SWAP_AMOUNT_USD_OPTIONS.map((amount) => ({
+            label: `${amount}`,
+            href: `/buy/${coin.mint}/${amount}`,
+          })),
+          {
+            href: `/buy/${coin.mint}/{${amountParameterName}}`,
+            label: `Buy ${coin.name}`,
+            parameters: [
+              {
+                name: amountParameterName,
+                label: 'Enter a custom USD amount',
+              },
+            ],
+          },
+          {
+            href: `/sell/${coin.mint}/{${amountParameterName}}`,
+            label: `Sell ${coin.name}`,
+            parameters: [
+              {
+                name: amountParameterName,
+                label: 'Enter a custom USD amount',
+              },
+            ],
+          },
+        ],
+      },
+    };
+
+    return c.json(response);
+  },
+);
+
+
+app.openapi(
+  createRoute({
     method: 'post',
     path: '/buy',
     tags: ['Pump Buy'],
