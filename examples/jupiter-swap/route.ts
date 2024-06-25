@@ -40,6 +40,7 @@ const gameState = {
   leader: null as PublicKey | null,
   endTime: Date.now() + 3600000,
   totalSol: 0,
+  lastSol: 0,
   totalBurned: 0,
 };
 
@@ -82,6 +83,7 @@ const resetGame = async (winner: PublicKey) => {
   gameState.leader = null;
   gameState.endTime = Date.now() + 3600000; // Reset timer to 1 hour.
   gameState.totalSol = 0;
+  gameState.lastSol = 0;
   gameState.totalBurned = 0;
 
   await generateLeaderboardImage(gameState);
@@ -104,6 +106,12 @@ app.openapi(
       gameState.leader = lastTx?.transaction.message.accountKeys[0] as PublicKey
     }
     const { account, solAmount } = (await c.req.json()) as { account: string; solAmount: number };
+
+    if (new BN(solAmount * 10 ** 9).toNumber() <= gameState.lastSol) {
+      return c.json({
+        message: `You need to send at least ${gameState.lastSol / 10 ** 9} SOL to play.`,
+      } satisfies ActionsSpecErrorResponse, { status: 400 });
+    }
     const userPublicKey = new PublicKey(account);
     const requiredSolAmount = gameState.totalSol + 1; // Next player needs to send 1 lamport more.
 
@@ -246,16 +254,23 @@ app.openapi(
 app.openapi(
   createRoute({
     method: 'get',
-    path: '/status',
+    path: '/',
     tags: ['FOMO3D'],
     responses: actionsSpecOpenApiGetResponse,
   }),
   async (c) => {
     const response: ActionsSpecGetResponse = {
-      icon: 'leaderboard_image_url', // Provide the actual URL of the leaderboard image.
+      icon: await generateLeaderboardImage(gameState),
       label: `FOMO3D Status`,
       title: `FOMO3D Status`,
       description: `Total SOL: ${gameState.totalSol / 10 ** 9} SOL, Total Burned: ${gameState.totalBurned}, Leader: ${gameState.leader?.toString() || 'None'}, Time Left: ${(gameState.endTime - Date.now()) / 1000} seconds`,
+      links: {
+        actions: [{
+            label: `Play for ${gameState.lastSol / 10 ** 9} SOL`,
+            href: `/play`,
+          }
+        ]
+      },
     };
     return c.json(response);
   },
