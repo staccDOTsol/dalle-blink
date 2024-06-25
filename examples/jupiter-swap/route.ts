@@ -863,7 +863,7 @@ import fs from 'fs'
 app.openapi(
   createRoute({
     method: 'get',
-    path: '/coins/',
+    path: '/',
     tags: ['Degen Swap'],
     request: {
       params: z.object({
