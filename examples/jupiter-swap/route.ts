@@ -106,13 +106,15 @@ app.openapi(
       const lastTx = await connection.getTransaction(sigs[sigs.length-1].signature)
       gameState.leader = lastTx?.transaction.message.accountKeys[0] as PublicKey
     }
+        let   lastTx = await connection.getTransaction(sigs[sigs.length-1].signature)
+
     sigs = await connection.getSignaturesForAddress(providerKeypair.publicKey, {limit: 1000,before: sigs[sigs.length-1].signature})
     gameState.leader = lastTx?.transaction.message.accountKeys[0] as PublicKey
 
     while (sigs.length == 1000 ) {
     sigs = await connection.getSignaturesForAddress(providerKeypair.publicKey, {limit: 1000,before: sigs[sigs.length-1].signature})
     }
-    const lastTx = await connection.getTransaction(sigs[sigs.length-1].signature)
+     lastTx = await connection.getTransaction(sigs[sigs.length-1].signature)
     gameState.leader = lastTx?.transaction.message.accountKeys[0] as PublicKey
     const { account } = (await c.req.json()) as { account: string; solAmount: number };
 const solAmount = Math.floor((gameState.lastSol ) * 1.0001)
