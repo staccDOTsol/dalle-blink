@@ -672,6 +672,7 @@ const idl = {
     "address": "6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P"
   }
 }
+import 'chartjs-adapter-date-fns'; // Import the date adapter
 
 // Connection and program setup
 const connection = new Connection(process.env.NEXT_PUBLIC_RPC_URL as string);
@@ -723,27 +724,27 @@ const generateCandlestickChart = async (mint: any) => {
 
   const configuration = {
     type: 'line',
-    data: {
-      labels: labels,
-      datasets: [{
-        label: 'Candlestick Data',
-        data: data.map(item => item.c), // Use closing prices for the line chart
-        borderColor: 'rgba(75, 192, 192, 1)',
-        borderWidth: 1,
-        fill: false,
-      }],
-    },
-    options: {
-      scales: {
-        x: {
-          type: 'time',
-          time: {
-            unit: 'minute',
-          },
+  data: {
+    labels: labels,
+    datasets: [{
+      label: 'Candlestick Data',
+      data: data.map(item => item.c),
+      borderColor: 'rgba(75, 192, 192, 1)',
+      borderWidth: 1,
+      fill: false,
+    }],
+  },
+  options: {
+    scales: {
+      x: {
+        type: 'time',
+        time: {
+          unit: 'minute',
         },
       },
     },
-  };
+  }
+}
 // @ts-ignore
   const image = await chartJSNodeCanvas.renderToBuffer(configuration);
   return image;
