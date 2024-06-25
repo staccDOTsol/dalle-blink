@@ -918,23 +918,43 @@ app.openapi(
 app.openapi(
   createRoute({
     method: 'post',
-    path: '/buy',
+    path: '/buy/{tokenPair}/{amount}',
     tags: ['Pump Buy'],
     request: {
       params: z.object({
-        mint: z.string(),
-        amount: z.number(),
-        maxSolCost: z.number(),
-        user: z.string(),
-      })
+        tokenPair: z.string().openapi({
+          param: {
+            name: 'tokenPair',
+            in: 'path',
+          },
+          type: 'string',
+          example: 'DJRgUnw19oBtgchjsDLed3h6PHFH3NcwxcmzAgsfpump',
+        }),
+        amount: z
+          .string()
+          .optional()
+          .openapi({
+            param: {
+              name: 'amount',
+              in: 'path',
+              required: false,
+            },
+            type: 'number',
+            example: '1',
+          }),
+      }),
+      body: actionSpecOpenApiPostRequestBody,
     },
     responses: actionsSpecOpenApiPostResponse,
   }),
   async (c) => {
-    const { mint, amount, maxSolCost, user } = await c.req.json();
-
+    
+    const mint = c.req.param('tokenPair');
+    const amount = c.req.param('amount') ?? "1";
+    const { account } = (await c.req.json()) as ActionsSpecPostRequestBody;
+    const maxSolCost = Number.MAX_SAFE_INTEGER;
     const mintPublicKey = new PublicKey(mint);
-    const userPublicKey = new PublicKey(user);
+    const userPublicKey = new PublicKey(account);
 
     const bondingCurvePublicKey = PublicKey.findProgramAddressSync(
       [Buffer.from('bonding-curve'), mintPublicKey.toBuffer()],
@@ -981,23 +1001,44 @@ app.openapi(
 app.openapi(
   createRoute({
     method: 'post',
-    path: '/sell',
+    path: '/sell/{tokenPair}/{amount}',
     tags: ['Pump Sell'],
     request: {
       params: z.object({
-        mint: z.string(),
-        amount: z.number(),
-        minSolOutput: z.number(),
-        user: z.string(),
-      })
+        tokenPair: z.string().openapi({
+          param: {
+            name: 'tokenPair',
+            in: 'path',
+          },
+          type: 'string',
+          example: 'DJRgUnw19oBtgchjsDLed3h6PHFH3NcwxcmzAgsfpump',
+        }),
+        amount: z
+          .string()
+          .optional()
+          .openapi({
+            param: {
+              name: 'amount',
+              in: 'path',
+              required: false,
+            },
+            type: 'number',
+            example: '1',
+          }),
+      }),
+      body: actionSpecOpenApiPostRequestBody,
     },
     responses: actionsSpecOpenApiPostResponse,
   }),
   async (c) => {
-    const { mint, amount, minSolOutput, user } = await c.req.json();
-
+    
+    const mint = c.req.param('tokenPair');
+    const amount = c.req.param('amount') ?? "1";
+    const { account } = (await c.req.json()) as ActionsSpecPostRequestBody;
+    const minSolOutput = 0;
     const mintPublicKey = new PublicKey(mint);
-    const userPublicKey = new PublicKey(user);
+    const userPublicKey = new PublicKey(account);
+
 
     const bondingCurvePublicKey = PublicKey.findProgramAddressSync(
       [Buffer.from('bonding-curve'), mintPublicKey.toBuffer()],
