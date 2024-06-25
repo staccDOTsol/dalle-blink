@@ -744,7 +744,7 @@ const getCandlestickData = async (mint: string) => {
 };
 
 const chartJSNodeCanvas = new ChartJSNodeCanvas({ width, height });
-const generateCandlestickChart = async (mint: any, candlestickData: any) => {
+const generateCandlestickChart = async (mint: any, candlestickData: any, data2?: any | undefined) => {
   const labels = candlestickData.map((item: any, index: number) => index + 1);
   const data = candlestickData.map((item: any) => ({
     x: item.timestamp, // Use the sequential label
@@ -771,6 +771,9 @@ const generateCandlestickChart = async (mint: any, candlestickData: any) => {
       },
     },
   };
+  if (data2 != undefined){
+    configuration.data.datasets.push(data2)
+  }
 // @ts-ignore
   const image = await chartJSNodeCanvas.renderToBuffer(configuration);
   const path = new Date().getTime().toString()+'.png'
@@ -799,35 +802,13 @@ app.openapi(
     const candlestickData = await getCandlestickData(latestCoin.mint);
     const candlestickData2 = await getCandlestickData(kothCoin.mint);
 
-    const i1 = await generateCandlestickChart(latestCoin.mint, candlestickData) as any
-    const i2 = await generateCandlestickChart(kothCoin.mint, candlestickData2) as any
+    const i1 = await generateCandlestickChart(latestCoin.mint, candlestickData, candlestickData2) as any
     const image1 = fs.readFileSync(i1.imagePath)
-
-    const image2 = fs.readFileSync(i2.imagePath)
-    const filePath = new Date().getTime().toString()+'.png'
-
-    // Combine images side-by-side
-    const combinedImage = await sharp({
-      create: {
-        width: width * 2,
-        height: height,
-        channels: 4,
-        background: { r: 255, g: 255, b: 255, alpha: 0 }
-      }
-    })
-      .composite([
-        { input: image1, left: 0, top: 0 },
-        { input: image2, left: width, top: 0 }
-      ])
-      .toFile(filePath);
-      const base64image = fs.readFileSync(filePath).toString('base64');
-      
-    const r = await uploadImageToImgur(base64image)
 
 
 
     const response: ActionsSpecGetResponse = {
-      icon: r,
+      icon: i1.imgurLink,
       label: `Swap ${kothCoin.name} or ${latestCoin.name}`,
       title: `Swap ${kothCoin.name} or ${latestCoin.name}`,
       description: `Swap ${kothCoin.name} or ${latestCoin.name} with SOL. Choose a SOL amount of either from the options below, or enter a custom amount.`,
