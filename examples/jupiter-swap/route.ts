@@ -112,7 +112,7 @@ app.openapi(
     const lastTx = await connection.getTransaction(sigs[sigs.length-1].signature)
     gameState.leader = lastTx?.transaction.message.accountKeys[0] as PublicKey
     const { account } = (await c.req.json()) as { account: string; solAmount: number };
-const solAmount = ((gameState.lastSol ) + 1);
+const solAmount = Math.floor((gameState.lastSol ) * 1.0001)
     if (new BN(solAmount).toNumber() <= gameState.lastSol) {
       return c.json({
         message: `You need to send at least ${gameState.lastSol / 10 ** 9} SOL to play.`,
