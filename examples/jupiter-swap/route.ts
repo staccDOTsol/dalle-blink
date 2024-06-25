@@ -784,7 +784,7 @@ const generateCandlestickChart = async (mint: any, data: any) => {
   await sharp(imageBuffer).toFile(imagePath);
 
   // Upload the image to Imgur
-  const imgurLink = await uploadImageToImgur(imagePath);
+  const imgurLink = await uploadImageToImgur(imageBuffer.toBuffer().toString('base64'));
   console.log('Imgur link:', imgurLink);
 
   return { imgurLink, imagePath };
