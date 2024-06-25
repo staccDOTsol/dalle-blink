@@ -988,7 +988,7 @@ app.openapi(
       ))
     }
 
-    const transaction = await program.methods.buy((new BN(Number(Math.floor(Number(amount)/ (candlestickData[candlestickData.length-1].close )/10**6)))), new BN(maxSolCost)).accounts({
+    const transaction = await program.methods.buy((new BN(Number(Math.floor(Number(amount)/ (candlestickData[candlestickData.length-1].close )*10**6)))), new BN(maxSolCost)).accounts({
       global,
       feeRecipient,
       mint: mintPublicKey,
@@ -1069,7 +1069,7 @@ app.openapi(
       true
     );
 
-    const transaction = await program.methods.sell(new BN((Number(Math.floor(Number(amount) / (candlestickData[candlestickData.length-1].close) / 10 ** 6)))), new BN(0)).accounts({
+    const transaction = await program.methods.sell(new BN((Number(Math.floor(Number(amount) / (candlestickData[candlestickData.length-1].close) * 10 ** 6)))), new BN(0)).accounts({
       global,
       feeRecipient,
       mint: mintPublicKey,
