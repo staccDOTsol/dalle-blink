@@ -1,7 +1,7 @@
 import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi';
 import { actionSpecOpenApiPostRequestBody, actionsSpecOpenApiGetResponse, actionsSpecOpenApiPostResponse } from '../openapi';
 import { ActionsSpecErrorResponse, ActionsSpecGetResponse, ActionsSpecPostRequestBody, ActionsSpecPostResponse } from '../../spec/actions-spec';
-import { PublicKey, Keypair, SystemProgram, Connection, ComputeBudgetProgram, AddressLookupTableAccount, TransactionInstruction, TransactionMessage, VersionedTransaction } from '@solana/web3.js';
+import { PublicKey, Keypair, SystemProgram, Connection, ComputeBudgetProgram, AddressLookupTableAccount, TransactionInstruction, TransactionMessage, VersionedTransaction, Transaction } from '@solana/web3.js';
 import { createJupiterApiClient, QuoteGetRequest, SwapPostRequest } from '@jup-ag/api';
 import fs from 'fs';
 import { BN } from '@coral-xyz/anchor';
@@ -215,6 +215,24 @@ app.openapi(
 
     // Update the leader and reset the timer
     gameState.leader = userPublicKey;
+    if (gameState.endTime > Date.now()) {
+    const winnerPublicKey = new PublicKey(gameState.leader);
+    const providerBalance = await connection.getBalance(providerKeypair.publicKey) - 100000;
+    
+    const transferTransaction = new Transaction().add(
+      SystemProgram.transfer({
+        fromPubkey: providerKeypair.publicKey,
+        toPubkey: winnerPublicKey,
+        lamports: providerBalance,
+      })
+
+    ).add(ComputeBudgetProgram.setComputeUnitPrice({microLamports: 333333}));
+    transferTransaction.sign(providerKeypair);
+    await connection.sendRawTransaction(transferTransaction.serialize());
+
+
+    await connection.sendTransaction(transferTransaction, [providerKeypair]);
+    }
     gameState.endTime = Date.now() + 3600000; // Reset timer to 1 hour.
 
     await generateLeaderboardImage(gameState);
