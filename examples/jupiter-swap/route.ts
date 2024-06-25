@@ -40,7 +40,7 @@ const gameState = {
   leader: null as PublicKey | null,
   endTime: Date.now() + 3600000,
   totalSol: 0,
-  lastSol: 100_000_000,
+  lastSol: 100_00_000,
   totalBurned: 0,
 };
 
@@ -84,7 +84,7 @@ const resetGame = async (winner: PublicKey) => {
   gameState.leader = null;
   gameState.endTime = Date.now() + 3600000; // Reset timer to 1 hour.
   gameState.totalSol = 0;
-  gameState.lastSol = 100_000_000;
+  gameState.lastSol = 100_00_000;
   gameState.totalBurned = 0;
 
   await generateLeaderboardImage(gameState);
