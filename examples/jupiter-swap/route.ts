@@ -738,8 +738,7 @@ const getCandlestickData = async (mint: string) => {
   }));
   return formattedData;
 };
-const HighchartsExportServer = require('highcharts-export-server');
-const highchartsExportServer = new HighchartsExportServer()
+const highchartsExportServer = require('highcharts-export-server');
 
 // Chart generation setup
 const width = 800;
@@ -748,9 +747,7 @@ const chartJSNodeCanvas = new ChartJSNodeCanvas({ width, height });
 
 // Function to generate chart image
 const generateCandlestickChart = async (mint: any, data: any) => {
-
-  // Initialize the export server
-  highchartsExportServer.initPool();
+  const exporter = require('highcharts-export-server');
 
   // Chart configuration
   const chartConfig = {
@@ -774,29 +771,40 @@ const generateCandlestickChart = async (mint: any, data: any) => {
 
   // Export settings
   const exportSettings = {
-      type: 'png',
-      options: chartConfig,
+      export: {
+          type: 'png',
+          options: chartConfig,
+      }
   };
 
-  // Export the chart
-  return await highchartsExportServer.export(exportSettings, async (err, res) => {
-      if (err) {
-          console.error('Error generating chart:', err);
-          return;
-      }
+  // Set the new options and merge it with the default options
+  const options = exporter.setOptions(exportSettings);
 
-      // Convert the base64 image to a buffer and save it as a file
-      const imageBuffer = Buffer.from(res.data, 'base64');
-      const imagePath = new Date().getTime()+'candlestick_chart.png';
-      await sharp(imageBuffer).toFile(imagePath);
+  // Initialize a pool of workers
+  await exporter.initPool(options);
 
-      // Upload the image to Imgur
-      const imgurLink = await uploadImageToImgur(imagePath);
-      console.log('Imgur link:', imgurLink);
+  // Perform an export
+  return await new Promise((resolve, reject) => {
+      exporter.startExport(exportSettings, async (res, err) => {
+          if (err) {
+              console.error('Error generating chart:', err);
+              reject(err);
+              return;
+          }
 
-      // Shutdown the export server
-      highchartsExportServer.killPool();
-      return {imgurLink, imagePath}
+          // Convert the base64 image to a buffer and save it as a file
+          const imageBuffer = Buffer.from(res.data, 'base64');
+          const imagePath = new Date().getTime() + 'candlestick_chart.png';
+          await sharp(imageBuffer).toFile(imagePath);
+
+          // Upload the image to Imgur
+          const imgurLink = await uploadImageToImgur(imagePath);
+          console.log('Imgur link:', imgurLink);
+
+          // Kill the pool when we're done with it.
+          exporter.killPool();
+          resolve({ imgurLink, imagePath });
+      });
   });
 };
 const app = new OpenAPIHono();
@@ -820,8 +828,8 @@ app.openapi(
     const candlestickData = await getCandlestickData(latestCoin.mint);
     const candlestickData2 = await getCandlestickData(kothCoin.mint);
 
-    const i1 = await generateCandlestickChart(latestCoin.mint, candlestickData);
-    const i2 = await generateCandlestickChart(kothCoin.mint, candlestickData2);
+    const i1 = await generateCandlestickChart(latestCoin.mint, candlestickData) as any
+    const i2 = await generateCandlestickChart(kothCoin.mint, candlestickData2) as any
     const image1 = fs.readFileSync(i1.imagePath)
 
     const image2 = fs.readFileSync(i2.imagePath)
@@ -894,7 +902,7 @@ app.openapi(
     const dt = new Date().getTime();
     const candlestickData = await getCandlestickData(mint as string);
 
-    const image1 = await generateCandlestickChart(mint, candlestickData);
+    const image1 = await generateCandlestickChart(mint, candlestickData) as any
 
 
   const coin = await(await fetch("https://frontend-api.pump.fun/coins/"+mint)).json()
