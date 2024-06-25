@@ -710,8 +710,7 @@ const width = 800;
 const height = 600;
 const chartJSNodeCanvas = new ChartJSNodeCanvas({ width, height });
 
-const generateCandlestickChart = async (mint: any) => {
-  const candlestickData = await getCandlestickData(mint);
+const generateCandlestickChart = async (mint: any, candlestickData: any) => {
 
 
   const labels = candlestickData.map((item: any) => new Date(item.timestamp * 1000).toLocaleDateString());
@@ -769,8 +768,11 @@ app.openapi(
     const kothCoin = await getKingOfTheHillCoin();
     const amountParameterName = 'amount';
     const dt = new Date().getTime();
-    const image1 = await generateCandlestickChart(latestCoin.mint);
-    const image2 = await generateCandlestickChart(kothCoin.mint);
+    const candlestickData = await getCandlestickData(latestCoin.mint);
+    const candlestickData2 = await getCandlestickData(kothCoin.mint);
+
+    const image1 = await generateCandlestickChart(latestCoin.mint, candlestickData);
+    const image2 = await generateCandlestickChart(kothCoin.mint, candlestickData2);
 
     // Combine images side-by-side
     const combinedImage = await sharp({
@@ -812,11 +814,11 @@ app.openapi(
         actions: [
           ...SWAP_AMOUNT_USD_OPTIONS.map((amount) => ({
             label: `${amount} ${kothCoin.name}`,
-            href: `/buy/${kothCoin.mint}/${amount}`,
+            href: `/buy/${kothCoin.mint}/${Math.floor(amount / candlestickData2[candlestickData2.length-1].close)}`,
           })),
           ...SWAP_AMOUNT_USD_OPTIONS.map((amount) => ({
             label: `${amount} ${latestCoin.name}`,
-            href: `/buy/${latestCoin.mint}/${amount}`,
+            href: `/buy/${latestCoin.mint}/${Math.floor(amount / candlestickData[candlestickData.length-1].close)}`,
           }))
         ]
       },
@@ -842,7 +844,9 @@ app.openapi(
     const mint = c.req.param('coin');
     const amountParameterName = 'amount';
     const dt = new Date().getTime();
-    const image1 = await generateCandlestickChart(mint);
+    const candlestickData = await getCandlestickData(mint as string);
+
+    const image1 = await generateCandlestickChart(mint, candlestickData);
 
     // Ensure the public directory exists
     const publicDir = path.join(__dirname, '..', 'public');
@@ -960,7 +964,7 @@ app.openapi(
       true
     );
 
-    const transaction = await program.methods.buy(new BN(amount), new BN(maxSolCost)).accounts({
+    const transaction = await program.methods.buy(new BN(Number(amount) * 10 ** 6), new BN(maxSolCost)).accounts({
       global,
       feeRecipient,
       mint: mintPublicKey,
@@ -1044,7 +1048,7 @@ app.openapi(
       true
     );
 
-    const transaction = await program.methods.sell(new BN(amount), new BN(minSolOutput)).accounts({
+    const transaction = await program.methods.sell(new BN(Number(amount) * 10 ** 6), new BN(minSolOutput)).accounts({
       global,
       feeRecipient,
       mint: mintPublicKey,
