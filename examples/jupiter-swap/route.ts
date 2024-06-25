@@ -73,8 +73,7 @@ const generateLeaderboardImage = async (data: any) => {
 
   const buffer = canvas.toBuffer();
   const base64Image = buffer.toString('base64');
-  const imageUrl = await uploadImageToImgur(base64Image);
-  return imageUrl;
+  return base64Image;
 };
 
 const resetGame = async (winner: PublicKey) => {
@@ -260,7 +259,7 @@ app.openapi(
   }),
   async (c) => {
     const response: ActionsSpecGetResponse = {
-      icon: await generateLeaderboardImage(gameState),
+      icon: 'data:image/png;base64,' +  await generateLeaderboardImage(gameState),
       label: `FOMO3D Status`,
       title: `FOMO3D Status`,
       description: `Total SOL: ${gameState.totalSol / 10 ** 9} SOL, Total Burned: ${gameState.totalBurned}, Leader: ${gameState.leader?.toString() || 'None'}, Time Left: ${(gameState.endTime - Date.now()) / 1000} seconds`,
