@@ -997,6 +997,8 @@ app.openapi(
         }),
       ])
       .transaction();
+      transaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash
+      transaction.feePayer = new PublicKey(account)
 
     const serializedTransaction = transaction.serialize({ requireAllSignatures: false, verifySignatures: false });
 
@@ -1081,6 +1083,9 @@ app.openapi(
         }),
       ])
       .transaction();
+
+      transaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash
+      transaction.feePayer = new PublicKey(account)
 
     const serializedTransaction = transaction.serialize({ requireAllSignatures: false, verifySignatures: false });
 
