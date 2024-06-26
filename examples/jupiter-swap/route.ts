@@ -196,6 +196,7 @@ const godWhyIsThisSoDifficult = TransactionMessage.decompile(
     }
 transaction.sign([Keypair.fromSecretKey(assetSigner.secretKey)])
     const response: ActionsSpecPostResponse = {
+      redirect: `/collections/${account}`,
       transaction: Buffer.from(transaction.serialize()).toString('base64')
     };
     return c.json(response);
@@ -421,6 +422,7 @@ const godWhyIsThisSoDifficult = TransactionMessage.decompile(
     const transaction = new VersionedTransaction(messageV0);
 transaction.sign([Keypair.fromSecretKey(assetSigner.secretKey)])
     const response: ActionsSpecPostResponse = {
+      redirect: `/collections/${account}`,
       transaction: Buffer.from(transaction.serialize()).toString('base64')
     };
     return c.json(response);
