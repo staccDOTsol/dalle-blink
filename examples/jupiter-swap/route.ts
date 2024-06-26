@@ -215,7 +215,7 @@ app.openapi(
     responses: actionsSpecOpenApiGetResponse,
   }),
   async (c) => {
-    const account = c.req.query('account');
+    const account = c.req.param('account');
     const collections = accountToCollectionMap.get(account as string);
     const response: ActionsSpecGetResponse = {
       icon: collections? collections[0].image : 'https://prod-image-cdn.tensor.trade/images/90x90/freeze=false/https%3A%2F%2Farweave.net%2FKBP_WiZet6YWoAz7S2pMgHnXHr2-sF8P0RLZu2tAqAM',
