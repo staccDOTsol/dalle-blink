@@ -121,7 +121,6 @@ app.openapi(
       prompt: prompt,
       n: 1,
 
-      size: '512x512'
     });
     const image_url = image.data[0].url;
     
@@ -271,7 +270,6 @@ const solAmount = 0.05 * 10 ** 9
       prompt: prompt,
       n: 1,
 
-      size: '512x512'
     });
     const image_url = image.data[0].url;
     console.log(image_url)
