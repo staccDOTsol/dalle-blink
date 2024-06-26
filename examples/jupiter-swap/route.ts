@@ -10,7 +10,7 @@ import {createBurnInstruction, getAssociatedTokenAddressSync} from '@solana/spl-
 const connection = new Connection(process.env.NEXT_PUBLIC_RPC_URL as string);
 const providerKeypair = Keypair.fromSecretKey(bs58.decode(process.env.KEY as string))
 const jupiterApi = createJupiterApiClient();
-const burnTokenAddress = 'StaccN8ycAamAmZgijj9B7wKHwUEF17XN3vrNx1pQ6Z';
+const burnTokenAddress = '9UWCWc1TM7zZj8CNCuXyCBQM4dYczSrMgPEHBnRNpump';
 
 // Function to upload image to Imgur with caching
 const cache = new Map();
