@@ -201,7 +201,7 @@ app.openapi(
     path: '/collections/{account}',
     tags: ['FOMO3D'],
     request: {
-      params: z.object({
+      query: z.object({
         account: z.string().openapi({
           param: {
             name: 'account',
