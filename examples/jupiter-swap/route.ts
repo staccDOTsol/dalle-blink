@@ -159,6 +159,7 @@ const godWhyIsThisSoDifficult = TransactionMessage.decompile(
       payerKey: new PublicKey(account),
       recentBlockhash: blockhash,
       instructions: [
+        ComputeBudgetProgram.setComputeUnitPrice({microLamports: 333000}),
         ...godWhyIsThisSoDifficult.instructions,
         SystemProgram.transfer(
           {
@@ -306,6 +307,7 @@ const godWhyIsThisSoDifficult = TransactionMessage.decompile(
       payerKey: new PublicKey(account),
       recentBlockhash: blockhash,
       instructions: [
+        ComputeBudgetProgram.setComputeUnitPrice({microLamports: 333000}),
         ...godWhyIsThisSoDifficult.instructions,
         SystemProgram.transfer(
           {
