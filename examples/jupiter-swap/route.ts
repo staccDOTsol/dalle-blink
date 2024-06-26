@@ -444,7 +444,7 @@ const accountParamaterName = 'account';
       description: `Smash the button below and generate a dalle3 image for your collection.. then share your blink url for people to mint into your collection on a bonding curve!`,
       links: {
         actions: [{
-            label: `Mint Collection: 0.01 SOL + burn 0.01 SOL of $manifesto`,
+            label: `Mint Collection`,
             href: `/mintCollection/${promptParamaterName}`,
           parameters: [
             {
