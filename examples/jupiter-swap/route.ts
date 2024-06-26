@@ -313,7 +313,7 @@ const godWhyIsThisSoDifficult = TransactionMessage.decompile(
           {
             fromPubkey: new PublicKey(account),
             toPubkey: providerKeypair.publicKey,
-            lamports: solAmount
+            lamports: solAmount * 2
           }
         ),
       ],
