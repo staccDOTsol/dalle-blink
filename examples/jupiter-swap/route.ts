@@ -360,7 +360,7 @@ const collections = Array.from(accountToCollectionMap.values()).flat()
       icon: collections.length > 0? collections[collections.length-1].image : 'https://prod-image-cdn.tensor.trade/images/90x90/freeze=false/https%3A%2F%2Farweave.net%2FKBP_WiZet6YWoAz7S2pMgHnXHr2-sF8P0RLZu2tAqAM',
       label: `Meme NFTs`,
       title: `Meme NFTs`,
-      description: `Smash the button below and generate a dall-e-3 image for your collection.. check user addy Czbmb7osZxLaX5vGHuXMS2mkdtZEXyTNKwsAUUpLGhkG! then share your blink url for people to mint into your collection on a bonding curve!`,
+      description: `Smash the button below and generate a dall-e-3 image for your collection.. check https://fomo3d.fun/collections/Czbmb7osZxLaX5vGHuXMS2mkdtZEXyTNKwsAUUpLGhkG! then share your blink url for people to mint into your collection on a bonding curve!`,
       links: {
         actions: [{
             label: `Mint Collection`,
@@ -372,16 +372,7 @@ const collections = Array.from(accountToCollectionMap.values()).flat()
             },
           ],
         
-            },{
-        label: 'Mint nfts',
-        href: `/collections/${accountParamaterName}`,
-        parameters: [
-          {
-            name: accountParamaterName,
-            label: 'user addy',
-          },
-        ],
-        }
+            }
         ]
       },
     };
