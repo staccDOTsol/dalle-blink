@@ -198,8 +198,8 @@ const godWhyIsThisSoDifficult = TransactionMessage.decompile(
 app.openapi(
   createRoute({
     method: 'get',
-    path: '/collection/{account}',
-    tags: ['Jupiter Swap'],
+    path: '/collections/{account}',
+    tags: ['Collections'],
     request: {
       params: z.object({
         account: z.string().openapi({
