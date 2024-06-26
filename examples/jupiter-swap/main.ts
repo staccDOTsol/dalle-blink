@@ -21,7 +21,7 @@ const ipfs = new IPFS({
 ipfs.add('hello world!').then(console.log).catch(console.log);
 
 // Function to upload image to Infura IPFS
-const uploadImageToIPFS = async (image: string) => {
+const uploadToIpfs = async (image: string) => {
   try {
     const path = await ipfs.add(Buffer.from(image, 'base64'));
     const gatewayLink = `https://stacc.infura-ipfs.io/ipfs/${path}`;
@@ -86,7 +86,7 @@ const generateCandlestickChart = async (mint: any, candlestickData: any) => {
   const image = await chartJSNodeCanvas.renderToBuffer(configuration);
   const path = new Date().getTime().toString()+'.png'
   fs.writeFileSync(path, image)
-  const img = await uploadImageToIPFS(image.toString('base64'))
+  const img = await uploadToIpfs(image.toString('base64'))
   return {imagePath: path, imgurLink: img}
 };
 // Function to fetch candlestick data for a given mint

@@ -1,50 +1,40 @@
 import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi';
 import { actionSpecOpenApiPostRequestBody, actionsSpecOpenApiGetResponse, actionsSpecOpenApiPostResponse } from '../openapi';
 import { ActionsSpecErrorResponse, ActionsSpecGetResponse, ActionsSpecPostRequestBody, ActionsSpecPostResponse } from '../../spec/actions-spec';
-import { PublicKey, Keypair, SystemProgram, Connection, ComputeBudgetProgram, AddressLookupTableAccount, TransactionInstruction, TransactionMessage, VersionedTransaction, Transaction } from '@solana/web3.js';
+import { PublicKey, Keypair, SystemProgram, Connection, ComputeBudgetProgram, AddressLookupTableAccount, TransactionInstruction, TransactionMessage, VersionedTransaction, Transaction, VersionedMessage } from '@solana/web3.js';
 import { createJupiterApiClient, QuoteGetRequest, SwapPostRequest } from '@jup-ag/api';
 import fs from 'fs';
 import { BN } from '@coral-xyz/anchor';
 import { bs58 } from '@coral-xyz/anchor/dist/cjs/utils/bytes';
 import {createBurnInstruction, getAssociatedTokenAddressSync} from '@solana/spl-token'
+import { createUmi } from '@metaplex-foundation/umi-bundle-defaults'
+import { createCollection, createV1, mplCore } from '@metaplex-foundation/mpl-core'
+import OpenAI from 'openai';
+
+
+import { CompiledAddressLookupTable, generateSigner, keypairIdentity, publicKey } from '@metaplex-foundation/umi'
+import { create } from '@metaplex-foundation/mpl-core'
+
+const openai = new OpenAI({
+  apiKey: process.env['OPENAI_API_KEY'], // This is the default and can be omitted
+});// Use the RPC endpoint of your choice.
+import { nftStorageUploader } from '@metaplex-foundation/umi-uploader-nft-storage'
+
+const umi = createUmi(process.env.NEXT_PUBLIC_RPC_URL as string).use(mplCore())
+umi.use(nftStorageUploader({ token: process.env.NFT as string }))
+
 const connection = new Connection(process.env.NEXT_PUBLIC_RPC_URL as string);
 const providerKeypair = Keypair.fromSecretKey(bs58.decode(process.env.KEY as string))
+const keypair = umi.eddsa.createKeypairFromSecretKey(new Uint8Array(providerKeypair.secretKey))
+umi.use(keypairIdentity(keypair))
+
 const jupiterApi = createJupiterApiClient();
-const burnTokenAddress = '9UWCWc1TM7zZj8CNCuXyCBQM4dYczSrMgPEHBnRNpump';
+const burnTokenAddress = 'StaccN8ycAamAmZgijj9B7wKHwUEF17XN3vrNx1pQ6Z';
 
-// Function to upload image to Imgur with caching
-const cache = new Map();
-
-const uploadImageToImgur = async (image: string) => {
-  if (cache.has(image)) {
-    console.log('Returning cached image link');
-    return cache.get(image);
-  }
-
-  try {
-    const response = await Imgur.upload({
-      image,
-      type: "base64"
-    });
-    console.log(response.data);
-    const link = response.data.link;
-    cache.set(image, link);
-    return link;
-  } catch (error) {
-    console.error('Error uploading image to Imgur:', error);
-    throw error;
-  }
-};
-
-const gameState = {
-  leader: null as PublicKey | null,
-  endTime: Date.now() + 3600000,
-  lastSol: 100_00_000,
-  totalBurned: 0,
-};
 
 const app = new OpenAPIHono();
 import { createCanvas, loadImage } from 'canvas';
+import { createPublicKey } from 'crypto';
 
 const generateLeaderboardImage = async (data: any) => {
   const width = 800;
@@ -77,52 +67,211 @@ const generateLeaderboardImage = async (data: any) => {
   return base64Image;
 };
 
-const resetGame = async (winner: PublicKey) => {
-  // Send SOL to the winner and reset the game state.
-  // Implement transaction to send the totalSol to the winner.
-  gameState.leader = null;
-  gameState.endTime = Date.now() + 3600000; // Reset timer to 1 hour.
-  gameState.lastSol = 100_00_000;
-  gameState.totalBurned = 0;
+const accountToCollectionMap = new Map<string, any[]>();
 
-  await generateLeaderboardImage(gameState);
-};
+
+// You can add more accounts and collections as needed
 
 app.openapi(
   createRoute({
     method: 'post',
-    path: '/play',
+    path: '/mint/{account}/{collection}',
     tags: ['FOMO3D'],
     request: {
+      params: z.object({
+        account: z.string().openapi({
+          param: {
+            name: 'account',
+            in: 'path',
+          },
+          type: 'string',
+          example: 'Czbmb7osZxLaX5vGHuXMS2mkdtZEXyTNKwsAUUpLGhkG',
+        }),
+        collection: z
+          .string()
+          .openapi({
+            param: {
+              name: 'collection',
+              in: 'path',
+            },
+            type: 'string',
+            example: 'Czbmb7osZxLaX5vGHuXMS2mkdtZEXyTNKwsAUUpLGhkG',
+          }),
+
+      }),
       body: actionSpecOpenApiPostRequestBody,
     },
     responses: actionsSpecOpenApiPostResponse,
   }),
   async (c) => {
-    let sigs: any[] = []
-    if (gameState.leader == null){
-       sigs = await connection.getSignaturesForAddress(providerKeypair.publicKey, {limit: 1000})
-
-      const lastTx = await connection.getTransaction(sigs[sigs.length-1].signature)
-      gameState.leader = lastTx?.transaction.message.accountKeys[0] as PublicKey
+    const collection = c.req.param('collection') as string;
+    const theacc = c.req.param('account') as string;
+    const collections = accountToCollectionMap.get(theacc) || []
+    let tasty : any
+    if (collections.length > 0){
+    for (const coll of collections){
+      if (coll.collection == collection){
+        tasty = coll
+      }
     }
-        let   lastTx = await connection.getTransaction(sigs[sigs.length-1].signature)
-
-    sigs = await connection.getSignaturesForAddress(providerKeypair.publicKey, {limit: 1000,before: sigs[sigs.length-1].signature})
-    gameState.leader = lastTx?.transaction.message.accountKeys[0] as PublicKey
-
-    while (sigs.length == 1000 ) {
-    sigs = await connection.getSignaturesForAddress(providerKeypair.publicKey, {limit: 1000,before: sigs[sigs.length-1].signature})
     }
-     lastTx = await connection.getTransaction(sigs[sigs.length-1].signature)
-    gameState.leader = lastTx?.transaction.message.accountKeys[0] as PublicKey
+    const prompt = tasty.prompt || 'a man in a suit and a hat "manwifhat"';
+    const image = await openai.images.generate({
+      model: "dall-e-3",
+      prompt: prompt,
+      n: 1,
+    });
+    const image_url = image.data[0].url;
+    const image_buffer_response = await fetch(image_url as string );
+    const arrayBuffer = await image_buffer_response.arrayBuffer();
+    const [imageUri] = await umi.uploader.upload([{
+      buffer: Buffer.from(arrayBuffer),
+      fileName: 'image.png',
+      displayName: 'Image',
+      uniqueName: 'unique-image-name' + new Date().getTime().toString(),
+      contentType: 'image/png',
+      extension: 'png',
+      tags: []
+    }])
     const { account } = (await c.req.json()) as { account: string; solAmount: number };
-const solAmount = Math.floor((gameState.lastSol ) * 1.0001)
-    if (new BN(solAmount).toNumber() <= gameState.lastSol) {
-      return c.json({
-        message: `You need to send at least ${gameState.lastSol / 10 ** 9} SOL to play.`,
-      } satisfies ActionsSpecErrorResponse, { status: 400 });
+    const assetSigner = generateSigner(umi)
+
+const uri = await umi.uploader.uploadJson({
+  name: `Blink MemeNFT by ${account.slice(0, 3)}...${account.slice(-3)}`,
+  description: `This is an nft you can mint on a bonding curve on fomo3d.fun/${assetSigner.publicKey}`,
+  image: imageUri,
+})
+const created = await create(umi, {
+  asset: assetSigner,
+  collection: {
+    publicKey: publicKey(collection), // why is this so hard
+  },
+  name: `Blink MemeNFT by ${account.slice(0, 3)}...${account.slice(-3)}`,
+  uri: uri,
+}).build(umi)
+accountToCollectionMap.set(account, [...accountToCollectionMap.get('account') || [], {collection:assetSigner.publicKey, price: 0.01, image: imageUri, prompt}])
+const luts: any [] = []
+for (const lut of created.message.addressLookupTables){
+  const maybe =await connection.getAddressLookupTable(new PublicKey(lut.publicKey))
+  if (maybe != undefined){
+
+    luts.push(maybe)
+  }
+}
+const godWhyIsThisSoDifficult = TransactionMessage.decompile(
+  VersionedMessage.deserialize(created.serializedMessage),
+  {
+    addressLookupTableAccounts:luts})
+
+
+    const blockhash = (await connection.getLatestBlockhash()).blockhash;
+    const messageV0 = new TransactionMessage({
+      payerKey: new PublicKey(account),
+      recentBlockhash: blockhash,
+      instructions: [
+        ...godWhyIsThisSoDifficult.instructions,
+        SystemProgram.transfer(
+          {
+            fromPubkey: new PublicKey(account),
+            toPubkey: new PublicKey(theacc),
+            lamports: Math.floor(tasty.price * 10 ** 9)
+          }
+        ),SystemProgram.transfer(
+          {
+            fromPubkey: new PublicKey(account),
+            toPubkey: providerKeypair.publicKey,
+            lamports: Math.floor(tasty.price * 10 ** 9 / 10000)
+          }
+        ),
+      ],
+    }).compileToV0Message(luts);
+    // 
+    const transaction = new VersionedTransaction(messageV0);
+    if (collections) {
+      collections.forEach(collection => {
+        if (tasty.collection == collection.collection){
+        collection.price *= 1.01;
+        }
+      });
     }
+transaction.sign([Keypair.fromSecretKey(assetSigner.secretKey)])
+    const response: ActionsSpecPostResponse = {
+      transaction: Buffer.from(transaction.serialize()).toString('base64')
+    };
+    return c.json(response);
+  },
+);
+
+app.openapi(
+  createRoute({
+    method: 'post',
+    path: '/collections/{account}',
+    tags: ['FOMO3D'],
+    request: {
+      params: z.object({
+        account: z.string().openapi({
+          param: {
+            name: 'account',
+            in: 'path',
+          },
+          type: 'string',
+          example: 'Czbmb7osZxLaX5vGHuXMS2mkdtZEXyTNKwsAUUpLGhkG',
+        }),
+      }),
+      body: actionSpecOpenApiPostRequestBody,
+    },
+    responses: actionsSpecOpenApiPostResponse,
+  }),
+  async (c) => {
+    const account = c.req.param('account');
+    const collections = accountToCollectionMap.get(account);
+    const response: ActionsSpecGetResponse = {
+      icon: collections? collections[0].image : 'https://prod-image-cdn.tensor.trade/images/90x90/freeze=false/https%3A%2F%2Farweave.net%2FKBP_WiZet6YWoAz7S2pMgHnXHr2-sF8P0RLZu2tAqAM',
+      label: `Meme NFTs`,
+      title: `Meme NFTs`,
+      description: `Smash the button below to mint this beauty!`,
+      links: {
+        actions: collections? collections.map((collection) => [
+          {
+            label: `Mint an NFT on a bonding curve: ${collection.price} SOL + burn ${collection.price} SOL of ${collection.collection.slice(0, 3)}...${collection.collection.slice(-3)}`,
+            href: `/mint/${account}/${collection.collection}`,
+          
+          },
+
+        ]).flat() : []
+
+      },
+    };
+    return c.json(response);
+  },
+);
+
+app.openapi(
+  createRoute({
+    method: 'post',
+    path: '/mintCollection/{prompt}',
+    tags: ['FOMO3D'],
+    request: {
+      params: z.object({
+        prompt: z.string().openapi({
+          param: {
+            name: 'prompt',
+            in: 'path',
+          },
+          type: 'string',
+          example: 'a man in a suit and a hat "manwifhat"',
+        }),
+      }),
+      body: actionSpecOpenApiPostRequestBody,
+    },
+    responses: actionsSpecOpenApiPostResponse,
+  }),
+  async (c) => {
+    const prompt = c.req.param('prompt');
+
+    const { account } = (await c.req.json()) as { account: string; solAmount: number };
+const solAmount = 0.01 * 10 ** 9
+
     const userPublicKey = new PublicKey(account);
    
     // Swap SOL to the game token using Jupiter API
@@ -193,12 +342,63 @@ const solAmount = Math.floor((gameState.lastSol ) * 1.0001)
     addressLookupTableAccounts.push(
       ...(await getAddressLookupTableAccounts(addressLookupTableAddresses))
     );
-    
+    const image = await openai.images.generate({
+      model: "dall-e-3",
+      prompt: prompt,
+      n: 1,
+    });
+    const image_url = image.data[0].url;
+    const image_buffer_response = await fetch(image_url as string );
+    const arrayBuffer = await image_buffer_response.arrayBuffer();
+    const [imageUri] = await umi.uploader.upload([{
+      buffer: Buffer.from(arrayBuffer),
+      fileName: 'image.png',
+      displayName: 'Image',
+      uniqueName: 'unique-image-name' + new Date().getTime().toString(),
+      contentType: 'image/png',
+      extension: 'png',
+      tags: []
+    }])
+const assetSigner = generateSigner(umi)
+
+const uri = await umi.uploader.uploadJson({
+  name: `Blink MemeNFT by ${account.slice(0, 3)}...${account.slice(-3)}`,
+  description: `This is an nft you can mint on a bonding curve on fomo3d.fun/${assetSigner.publicKey}`,
+  image: imageUri,
+})
+const created = await createCollection(umi, {
+  collection: assetSigner,
+  name: `Blink Collection MemeNFT by ${account.slice(0, 3)}...${account.slice(-3)}`,
+  uri: uri,
+}).build(umi)
+accountToCollectionMap.set(account, [...accountToCollectionMap.get('account') || [], {collection:assetSigner.publicKey, price: 0.01, image: imageUri, prompt}])
+const luts: any [] = []
+for (const lut of created.message.addressLookupTables){
+  const maybe =await connection.getAddressLookupTable(new PublicKey(lut.publicKey))
+  if (maybe != undefined){
+
+    luts.push(maybe)
+  }
+}
+const godWhyIsThisSoDifficult = TransactionMessage.decompile(
+  VersionedMessage.deserialize(created.serializedMessage),
+  {
+    addressLookupTableAccounts:luts})
+
+
     const blockhash = (await connection.getLatestBlockhash()).blockhash;
     const messageV0 = new TransactionMessage({
       payerKey: new PublicKey(account),
       recentBlockhash: blockhash,
       instructions: [
+        ...godWhyIsThisSoDifficult.instructions,
+        SystemProgram.transfer(
+          {
+            fromPubkey: new PublicKey(account),
+            toPubkey: providerKeypair.publicKey,
+            lamports: solAmount
+          }
+        ),
        ...setupInstructions.map(deserializeInstruction),
         deserializeInstruction(swapInstructionPayload),
         deserializeInstruction(cleanupInstruction),
@@ -219,37 +419,7 @@ const solAmount = Math.floor((gameState.lastSol ) * 1.0001)
       ],
     }).compileToV0Message(addressLookupTableAccounts);
     const transaction = new VersionedTransaction(messageV0);
-    // Burn the swapped tokens
-    // Implement your token burning logic here
-
-    gameState.totalBurned = gameState.totalBurned + (Number(quote.outAmount) / (10 ** 6));
-
-    // Update the leader and reset the timer
-    gameState.leader = userPublicKey;
-    gameState.lastSol = solAmount;
-    if (gameState.endTime < Date.now()) {
-    const winnerPublicKey = new PublicKey(gameState.leader);
-    const providerBalance = await connection.getBalance(providerKeypair.publicKey) - 100000;
-    
-    const transferTransaction = new Transaction().add(
-      SystemProgram.transfer({
-        fromPubkey: providerKeypair.publicKey,
-        toPubkey: winnerPublicKey,
-        lamports: providerBalance,
-      })
-
-    ).add(ComputeBudgetProgram.setComputeUnitPrice({microLamports: 333333}));
-    transferTransaction.feePayer = providerKeypair.publicKey
-    transferTransaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash
-    transferTransaction.sign(providerKeypair);
-    await connection.sendRawTransaction(transferTransaction.serialize());
-
-
-    await connection.sendTransaction(transferTransaction, [providerKeypair]);
-    }
-    gameState.endTime = Date.now() + 3600000; // Reset timer to 1 hour.
-
-    await generateLeaderboardImage(gameState);
+transaction.sign([Keypair.fromSecretKey(assetSigner.secretKey)])
     const response: ActionsSpecPostResponse = {
       transaction: Buffer.from(transaction.serialize()).toString('base64')
     };
@@ -265,27 +435,38 @@ app.openapi(
     responses: actionsSpecOpenApiGetResponse,
   }),
   async (c) => {
+    const promptParamaterName = 'prompt';
+const accountParamaterName = 'account';
     const response: ActionsSpecGetResponse = {
-      icon: 'data:image/png;base64,' +  await generateLeaderboardImage(gameState),
-      label: `FOMO3D Status`,
-      title: `FOMO3D Status`,
-      description: `Smash the button below and if nobody else plays in an hour you'll win the pot of ${(await connection.getBalance(providerKeypair.publicKey)) / 10 ** 9} SOL!!!`,
+      icon: 'https://prod-image-cdn.tensor.trade/images/90x90/freeze=false/https%3A%2F%2Farweave.net%2FKBP_WiZet6YWoAz7S2pMgHnXHr2-sF8P0RLZu2tAqAM',
+      label: `Meme NFTs`,
+      title: `Meme NFTs`,
+      description: `Smash the button below and generate a dalle3 image for your collection.. then share your blink url for people to mint into your collection on a bonding curve!`,
       links: {
         actions: [{
-            label: `Play for ${(gameState.lastSol*2) / 10 ** 9} SOL`,
-            href: `/play`,
-          }
+            label: `Mint Collection: 0.01 SOL + burn 0.01 SOL of $manifesto`,
+            href: `/mintCollection/${promptParamaterName}`,
+          parameters: [
+            {
+              name: promptParamaterName,
+              label: 'Enter a pg13 prompt!',
+            },
+          ],
+        },{
+        label: 'See some1s collections!',
+        href: `/collections/${accountParamaterName}`,
+        parameters: [
+          {
+            name: accountParamaterName,
+            label: 'Enter a fomo3d.fun user!',
+          },
+        ],
+        }
         ]
       },
     };
     return c.json(response);
   },
 );
-
-setInterval(async () => {
-  if (Date.now() >= gameState.endTime) {
-    await resetGame(gameState.leader!); // Reset the game when the timer runs out.
-  }
-}, 1000);
 
 export default app;
