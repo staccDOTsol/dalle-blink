@@ -286,6 +286,7 @@ const solAmount = 0.01 * 10 ** 9
     };
 
     const quote = await jupiterApi.quoteGet(quoteRequest);
+    console.log(quote)
     const swapRequest: SwapPostRequest = {
       swapRequest: {
         quoteResponse: quote,
@@ -352,6 +353,8 @@ const solAmount = 0.01 * 10 ** 9
       size: '256x256'
     });
     const image_url = image.data[0].url;
+    console.log(image_url)
+
     const image_buffer_response = await fetch(image_url as string );
     const arrayBuffer = await image_buffer_response.arrayBuffer();
     const [imageUri] = await umi.uploader.upload([{
@@ -363,6 +366,7 @@ const solAmount = 0.01 * 10 ** 9
       extension: 'png',
       tags: []
     }])
+    console.log(imageUri)
 const assetSigner = generateSigner(umi)
 
 const uri = await umi.uploader.uploadJson({
