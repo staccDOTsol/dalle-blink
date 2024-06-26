@@ -140,7 +140,6 @@ const created = await create(umi, {
   name: `Blink MemeNFT by ${account.slice(0, 3)}...${account.slice(-3)}`,
   uri: uri,
 }).build(umi)
-accountToCollectionMap.set(account, [...accountToCollectionMap.get('account') || [], {collection:assetSigner.publicKey, price: 0.01, image: imageUri, prompt}])
 const luts: any [] = []
 for (const lut of created.message.addressLookupTables){
   const maybe =await connection.getAddressLookupTable(new PublicKey(lut.publicKey))
@@ -288,7 +287,7 @@ const created = await createCollection(umi, {
   name: `Blink Collection MemeNFT by ${account.slice(0, 3)}...${account.slice(-3)}`,
   uri: uri,
 }).build(umi)
-accountToCollectionMap.set(account, [...accountToCollectionMap.get('account') || [], {collection:assetSigner.publicKey, price: 0.01, image: imageUri, prompt}])
+accountToCollectionMap.set(account, [...accountToCollectionMap.get('account') || [], {collection:assetSigner.publicKey, price: 0.01, image: image_url, prompt}])
 const luts: any [] = []
 for (const lut of created.message.addressLookupTables){
   const maybe =await connection.getAddressLookupTable(new PublicKey(lut.publicKey))
