@@ -269,7 +269,7 @@ app.openapi(
       icon: 'data:image/png;base64,' +  await generateLeaderboardImage(gameState),
       label: `FOMO3D Status`,
       title: `FOMO3D Status`,
-      description: `Total SOL: ${await connection.getBalance(providerKeypair.publicKey) / 10 ** 9} SOL, Total Burned: ${gameState.totalBurned}, Leader: ${gameState.leader?.toString() || 'None'}, Time Left: ${(gameState.endTime - Date.now()) / 1000} seconds. Write this as a logical sentence, smash the button below and if nobody else plays in an hour you'll win the pot of ${(await connection.getBalance(providerKeypair.publicKey)) / 10 ** 9} SOL!!!`,
+      description: `Smash the button below and if nobody else plays in an hour you'll win the pot of ${(await connection.getBalance(providerKeypair.publicKey)) / 10 ** 9} SOL!!!`,
       links: {
         actions: [{
             label: `Play for ${(gameState.lastSol*2) / 10 ** 9} SOL`,
