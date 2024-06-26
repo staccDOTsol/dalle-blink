@@ -198,10 +198,10 @@ const godWhyIsThisSoDifficult = TransactionMessage.decompile(
 app.openapi(
   createRoute({
     method: 'get',
-    path: '/collections/{account}',
-    tags: ['FOMO3D'],
+    path: '/collection/{account}',
+    tags: ['Jupiter Swap'],
     request: {
-      query: z.object({
+      params: z.object({
         account: z.string().openapi({
           param: {
             name: 'account',
@@ -211,9 +211,8 @@ app.openapi(
           example: 'Czbmb7osZxLaX5vGHuXMS2mkdtZEXyTNKwsAUUpLGhkG',
         }),
       }),
-      body: actionSpecOpenApiPostRequestBody,
     },
-    responses: actionsSpecOpenApiPostResponse,
+    responses: actionsSpecOpenApiGetResponse,
   }),
   async (c) => {
     const account = c.req.query('account');
@@ -344,7 +343,7 @@ const collections = Array.from(accountToCollectionMap.values()).flat()
       icon: collections.length > 0? collections[collections.length-1].image : 'https://prod-image-cdn.tensor.trade/images/90x90/freeze=false/https%3A%2F%2Farweave.net%2FKBP_WiZet6YWoAz7S2pMgHnXHr2-sF8P0RLZu2tAqAM',
       label: `Meme NFTs`,
       title: `Meme NFTs`,
-      description: `Smash the button below and generate a dall-e-3 image for your collection.. then share your blink url for people to mint into your collection on a bonding curve!`,
+      description: `Smash the button below and generate a dall-e-3 image for your collection.. check user addy Czbmb7osZxLaX5vGHuXMS2mkdtZEXyTNKwsAUUpLGhkG! then share your blink url for people to mint into your collection on a bonding curve!`,
       links: {
         actions: [{
             label: `Mint Collection`,
