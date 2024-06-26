@@ -123,24 +123,14 @@ app.openapi(
       size: '256x256'
     });
     const image_url = image.data[0].url;
-    const image_buffer_response = await fetch(image_url as string );
-    const arrayBuffer = await image_buffer_response.arrayBuffer();
-    const [imageUri] = await umi.uploader.upload([{
-      buffer: Buffer.from(arrayBuffer),
-      fileName: 'image.png',
-      displayName: 'Image',
-      uniqueName: 'unique-image-name' + new Date().getTime().toString(),
-      contentType: 'image/png',
-      extension: 'png',
-      tags: []
-    }])
+    
     const { account } = (await c.req.json()) as { account: string; solAmount: number };
     const assetSigner = generateSigner(umi)
 
 const uri = await umi.uploader.uploadJson({
   name: `Blink MemeNFT by ${account.slice(0, 3)}...${account.slice(-3)}`,
   description: `This is an nft you can mint on a bonding curve on fomo3d.fun/${assetSigner.publicKey}`,
-  image: imageUri,
+  image: image_url,
 })
 const created = await create(umi, {
   asset: assetSigner,
@@ -286,24 +276,12 @@ const solAmount = 0.05 * 10 ** 9
     const image_url = image.data[0].url;
     console.log(image_url)
 
-    const image_buffer_response = await fetch(image_url as string );
-    const arrayBuffer = await image_buffer_response.arrayBuffer();
-    const [imageUri] = await umi.uploader.upload([{
-      buffer: Buffer.from(arrayBuffer),
-      fileName: 'image.png',
-      displayName: 'Image',
-      uniqueName: 'unique-image-name' + new Date().getTime().toString(),
-      contentType: 'image/png',
-      extension: 'png',
-      tags: []
-    }])
-    console.log(imageUri)
 const assetSigner = generateSigner(umi)
 
 const uri = await umi.uploader.uploadJson({
   name: `Blink MemeNFT by ${account.slice(0, 3)}...${account.slice(-3)}`,
   description: `This is an nft you can mint on a bonding curve on fomo3d.fun/${assetSigner.publicKey}`,
-  image: imageUri,
+  image: image_url,
 })
 const created = await createCollection(umi, {
   collection: assetSigner,
