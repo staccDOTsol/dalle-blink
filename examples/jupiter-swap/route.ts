@@ -120,6 +120,7 @@ app.openapi(
       model: "dall-e-3",
       prompt: prompt,
       n: 1,
+      size: '256x256'
     });
     const image_url = image.data[0].url;
     const image_buffer_response = await fetch(image_url as string );
@@ -347,6 +348,8 @@ const solAmount = 0.01 * 10 ** 9
       model: "dall-e-3",
       prompt: prompt,
       n: 1,
+
+      size: '256x256'
     });
     const image_url = image.data[0].url;
     const image_buffer_response = await fetch(image_url as string );
