@@ -359,14 +359,7 @@ const collecetions = Array.from(accountToCollectionMap.values()).flat()
               label: 'pg13 prompt!',
             },
           ],
-        },{
-          label: 'Mint 1st nft',
-          href: `/mint/${collecetions[0].account}/${collecetions[0].collection}`,
         
-          },{
-            label: 'Mint Most Recent nft',
-            href: `/mint/${collecetions[collecetions.length-1].account}/${collecetions[collecetions.length-1].collection}`,
-          
             },{
         label: 'Mint nfts',
         href: `/collections/${accountParamaterName}`,
@@ -380,6 +373,16 @@ const collecetions = Array.from(accountToCollectionMap.values()).flat()
         ]
       },
     };
+    collecetions.length > 0 && response && response.links && response.links.actions.push(...[{
+      label: 'Mint 1st nft',
+      href: `/mint/${collecetions[0].account}/${collecetions[0].collection}`,
+    
+      },{
+        label: 'Mint Most Recent nft',
+        href: `/mint/${collecetions[collecetions.length-1].account}/${collecetions[collecetions.length-1].collection}`,
+      
+        }]) 
+    
     return c.json(response);
   },
 );
