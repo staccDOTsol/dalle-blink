@@ -18,10 +18,10 @@ import { create } from '@metaplex-foundation/mpl-core'
 const openai = new OpenAI({
   apiKey: process.env['OPENAI_API_KEY'], // This is the default and can be omitted
 });// Use the RPC endpoint of your choice.
-import { nftStorageUploader } from '@metaplex-foundation/umi-uploader-nft-storage'
+import { irysUploader } from '@metaplex-foundation/umi-uploader-irys'
 
 const umi = createUmi(process.env.NEXT_PUBLIC_RPC_URL as string).use(mplCore())
-umi.use(nftStorageUploader({ token: process.env.NFT as string }))
+umi.use(irysUploader())
 
 const connection = new Connection(process.env.NEXT_PUBLIC_RPC_URL as string);
 const providerKeypair = Keypair.fromSecretKey(bs58.decode(process.env.KEY as string))
@@ -117,7 +117,7 @@ app.openapi(
     }
     const prompt = tasty.prompt || 'a man in a suit and a hat "manwifhat"';
     const image = await openai.images.generate({
-      model: "dall-e-2",
+      model: "dall-e-3",
       prompt: prompt,
       n: 1,
       size: '256x256'
@@ -266,7 +266,7 @@ const solAmount = 0.05 * 10 ** 9
     const userPublicKey = new PublicKey(account);
    
     const image = await openai.images.generate({
-      model: "dall-e-2",
+      model: "dall-e-3",
       prompt: prompt,
       n: 1,
 
@@ -347,7 +347,7 @@ const collecetions = Array.from(accountToCollectionMap.values()).flat()
       icon: collecetions.length > 0? collecetions[collecetions.length-1].image : 'https://prod-image-cdn.tensor.trade/images/90x90/freeze=false/https%3A%2F%2Farweave.net%2FKBP_WiZet6YWoAz7S2pMgHnXHr2-sF8P0RLZu2tAqAM',
       label: `Meme NFTs`,
       title: `Meme NFTs`,
-      description: `Smash the button below and generate a dall-e-2 image for your collection.. then share your blink url for people to mint into your collection on a bonding curve!`,
+      description: `Smash the button below and generate a dall-e-3 image for your collection.. then share your blink url for people to mint into your collection on a bonding curve!`,
       links: {
         actions: [{
             label: `Mint Collection`,
