@@ -235,7 +235,7 @@ app.openapi(
       links: {
         actions: collections? collections.map((collection) => [
           {
-            label: `Mint an NFT on a bonding curve: ${collection.price} SOL + burn ${collection.price} SOL of ${collection.collection.slice(0, 3)}...${collection.collection.slice(-3)}`,
+            label: `Mint an NFT on a bonding curve: ${collection.price} SOL`,
             href: `/mint/${account}/${collection.collection}`,
           
           },
@@ -272,7 +272,7 @@ app.openapi(
     const prompt = c.req.param('prompt');
 
     const { account } = (await c.req.json()) as { account: string };
-const solAmount = 0.01 * 10 ** 9
+const solAmount = 0.05 * 10 ** 9
 
     const userPublicKey = new PublicKey(account);
    
