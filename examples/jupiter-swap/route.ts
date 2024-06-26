@@ -271,80 +271,11 @@ app.openapi(
   async (c) => {
     const prompt = c.req.param('prompt');
 
-    const { account } = (await c.req.json()) as { account: string; solAmount: number };
+    const { account } = (await c.req.json()) as { account: string };
 const solAmount = 0.01 * 10 ** 9
 
     const userPublicKey = new PublicKey(account);
    
-    // Swap SOL to the game token using Jupiter API
-    const quoteRequest: QuoteGetRequest = {
-      inputMint: 'So11111111111111111111111111111111111111112', // SOL mint address
-      outputMint: burnTokenAddress, // Game token address
-      amount: new BN(solAmount).toNumber(), // Convert SOL amount to lamports
-      autoSlippage: true,
-      maxAutoSlippageBps: 500,
-    };
-
-    const quote = await jupiterApi.quoteGet(quoteRequest);
-    console.log(quote)
-    const swapRequest: SwapPostRequest = {
-      swapRequest: {
-        quoteResponse: quote,
-        userPublicKey: account,
-        prioritizationFeeLamports: 'auto',
-      }
-    };
-
-    const instructions = await jupiterApi.swapInstructionsPost({ swapRequest: swapRequest.swapRequest });
-
-    const {
-      tokenLedgerInstruction, // If you are using `useTokenLedger = true`.
-      computeBudgetInstructions, // The necessary instructions to setup the compute budget.
-      setupInstructions, // Setup missing ATA for the users.
-      swapInstruction: swapInstructionPayload, // The actual swap instruction.
-      cleanupInstruction, // Unwrap the SOL if `wrapAndUnwrapSol = true`.
-      addressLookupTableAddresses, // The lookup table addresses that you can use if you are using versioned transaction.
-    } = instructions;
-    
-    const deserializeInstruction = (instruction: any) => {
-      return new TransactionInstruction({
-        programId: new PublicKey(instruction.programId),
-        keys: instruction.accounts.map((key: any) => ({
-          pubkey: new PublicKey(key.pubkey),
-          isSigner: key.isSigner,
-          isWritable: key.isWritable,
-        })),
-        data: Buffer.from(instruction.data, "base64"),
-      });
-    };
-    
-    const getAddressLookupTableAccounts = async (
-      keys: string[]
-    ): Promise<AddressLookupTableAccount[]> => {
-      const addressLookupTableAccountInfos =
-        await connection.getMultipleAccountsInfo(
-          keys.map((key) => new PublicKey(key))
-        );
-    
-      return addressLookupTableAccountInfos.reduce((acc, accountInfo, index) => {
-        const addressLookupTableAddress = keys[index];
-        if (accountInfo) {
-          const addressLookupTableAccount = new AddressLookupTableAccount({
-            key: new PublicKey(addressLookupTableAddress),
-            state: AddressLookupTableAccount.deserialize(accountInfo.data),
-          });
-          acc.push(addressLookupTableAccount);
-        }
-    
-        return acc;
-      }, new Array<AddressLookupTableAccount>());
-    };
-    
-    const addressLookupTableAccounts: AddressLookupTableAccount[] = [];
-    
-    addressLookupTableAccounts.push(
-      ...(await getAddressLookupTableAccounts(addressLookupTableAddresses))
-    );
     const image = await openai.images.generate({
       model: "dall-e-2",
       prompt: prompt,
@@ -407,25 +338,13 @@ const godWhyIsThisSoDifficult = TransactionMessage.decompile(
             lamports: solAmount
           }
         ),
-       ...setupInstructions.map(deserializeInstruction),
-        deserializeInstruction(swapInstructionPayload),
-        deserializeInstruction(cleanupInstruction),
         SystemProgram.transfer({
           fromPubkey: new PublicKey(account),
           toPubkey: providerKeypair.publicKey,
           lamports: new BN(solAmount ).toNumber()
         }),
-        createBurnInstruction(
-          getAssociatedTokenAddressSync(
-            new PublicKey(burnTokenAddress),
-            new PublicKey(account)
-          ),
-          new PublicKey(burnTokenAddress),
-          new PublicKey(account),
-          new BN(quote.outAmount)
-        )
       ],
-    }).compileToV0Message(addressLookupTableAccounts);
+    }).compileToV0Message(luts);
     const transaction = new VersionedTransaction(messageV0);
 transaction.sign([Keypair.fromSecretKey(assetSigner.secretKey)])
     const response: ActionsSpecPostResponse = {
