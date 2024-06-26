@@ -159,7 +159,7 @@ const godWhyIsThisSoDifficult = TransactionMessage.decompile(
       payerKey: new PublicKey(account),
       recentBlockhash: blockhash,
       instructions: [
-        ComputeBudgetProgram.setComputeUnitPrice({microLamports: 333000}),
+        ComputeBudgetProgram.setComputeUnitPrice({microLamports: 1333000}),
         ...godWhyIsThisSoDifficult.instructions,
         SystemProgram.transfer(
           {
@@ -307,7 +307,7 @@ const godWhyIsThisSoDifficult = TransactionMessage.decompile(
       payerKey: new PublicKey(account),
       recentBlockhash: blockhash,
       instructions: [
-        ComputeBudgetProgram.setComputeUnitPrice({microLamports: 333000}),
+        ComputeBudgetProgram.setComputeUnitPrice({microLamports: 1333000}),
         ...godWhyIsThisSoDifficult.instructions,
         SystemProgram.transfer(
           {
@@ -343,9 +343,9 @@ app.openapi(
   async (c) => {
     const promptParamaterName = 'prompt';
 const accountParamaterName = 'account';
-const collecetions = Array.from(accountToCollectionMap.values()).flat()
+const collections = Array.from(accountToCollectionMap.values()).flat()
     const response: ActionsSpecGetResponse = {
-      icon: collecetions.length > 0? collecetions[collecetions.length-1].image : 'https://prod-image-cdn.tensor.trade/images/90x90/freeze=false/https%3A%2F%2Farweave.net%2FKBP_WiZet6YWoAz7S2pMgHnXHr2-sF8P0RLZu2tAqAM',
+      icon: collections.length > 0? collections[collections.length-1].image : 'https://prod-image-cdn.tensor.trade/images/90x90/freeze=false/https%3A%2F%2Farweave.net%2FKBP_WiZet6YWoAz7S2pMgHnXHr2-sF8P0RLZu2tAqAM',
       label: `Meme NFTs`,
       title: `Meme NFTs`,
       description: `Smash the button below and generate a dall-e-2 image for your collection.. then share your blink url for people to mint into your collection on a bonding curve!`,
@@ -373,13 +373,13 @@ const collecetions = Array.from(accountToCollectionMap.values()).flat()
         ]
       },
     };
-    collecetions.length > 0 && response && response.links && response.links.actions.push(...[{
+    collections.length > 0 && response && response.links && response.links.actions.push(...[{
       label: 'Mint 1st nft',
-      href: `/mint/${collecetions[0].account}/${collecetions[0].collection}`,
+      href: `/mint/${collections[0].account}/${collections[0].collection}`,
     
       },{
         label: 'Mint Most Recent nft',
-        href: `/mint/${collecetions[collecetions.length-1].account}/${collecetions[collecetions.length-1].collection}`,
+        href: `/mint/${collections[collections.length-1].account}/${collections[collections.length-1].collection}`,
       
         }]) 
     
