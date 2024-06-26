@@ -117,7 +117,7 @@ app.openapi(
     }
     const prompt = tasty.prompt || 'a man in a suit and a hat "manwifhat"';
     const image = await openai.images.generate({
-      model: "dall-e-3",
+      model: "dall-e-2",
       prompt: prompt,
       n: 1,
 
@@ -261,12 +261,12 @@ app.openapi(
     const prompt = c.req.param('prompt');
 
     const { account } = (await c.req.json()) as { account: string };
-const solAmount = 0.05 * 10 ** 9
+const solAmount = 0.04 * 10 ** 9
 
     const userPublicKey = new PublicKey(account);
    
     const image = await openai.images.generate({
-      model: "dall-e-3",
+      model: "dall-e-2",
       prompt: prompt,
       n: 1,
 
@@ -346,7 +346,7 @@ const collecetions = Array.from(accountToCollectionMap.values()).flat()
       icon: collecetions.length > 0? collecetions[collecetions.length-1].image : 'https://prod-image-cdn.tensor.trade/images/90x90/freeze=false/https%3A%2F%2Farweave.net%2FKBP_WiZet6YWoAz7S2pMgHnXHr2-sF8P0RLZu2tAqAM',
       label: `Meme NFTs`,
       title: `Meme NFTs`,
-      description: `Smash the button below and generate a dall-e-3 image for your collection.. then share your blink url for people to mint into your collection on a bonding curve!`,
+      description: `Smash the button below and generate a dall-e-2 image for your collection.. then share your blink url for people to mint into your collection on a bonding curve!`,
       links: {
         actions: [{
             label: `Mint Collection`,
