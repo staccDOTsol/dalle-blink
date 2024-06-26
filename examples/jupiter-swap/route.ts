@@ -316,11 +316,6 @@ const godWhyIsThisSoDifficult = TransactionMessage.decompile(
             lamports: solAmount
           }
         ),
-        SystemProgram.transfer({
-          fromPubkey: new PublicKey(account),
-          toPubkey: providerKeypair.publicKey,
-          lamports: new BN(solAmount ).toNumber()
-        }),
       ],
     }).compileToV0Message(luts);
     const transaction = new VersionedTransaction(messageV0);
