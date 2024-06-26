@@ -449,16 +449,16 @@ const accountParamaterName = 'account';
           parameters: [
             {
               name: promptParamaterName,
-              label: 'Enter a pg13 prompt!',
+              label: 'pg13 prompt!',
             },
           ],
         },{
-        label: 'See some1s collections!',
+        label: 'Mint nfts',
         href: `/collections/${accountParamaterName}`,
         parameters: [
           {
             name: accountParamaterName,
-            label: 'Enter a fomo3d.fun user!',
+            label: 'user addy',
           },
         ],
         }
