@@ -10,6 +10,7 @@ import {createBurnInstruction, getAssociatedTokenAddressSync} from '@solana/spl-
 import { createUmi } from '@metaplex-foundation/umi-bundle-defaults'
 import { createCollection, createV1, mplCore } from '@metaplex-foundation/mpl-core'
 import OpenAI from 'openai';
+import { ruleSet } from '@metaplex-foundation/mpl-core'
 
 
 import { CompiledAddressLookupTable, generateSigner, keypairIdentity, publicKey } from '@metaplex-foundation/umi'
@@ -132,11 +133,27 @@ const uri = await umi.uploader.uploadJson({
   description: `This is an nft you can mint on a bonding curve on fomo3d.fun/${assetSigner.publicKey}`,
   image: image_url,
 })
+
+const creators = [
+  { address: publicKey(providerKeypair.publicKey), percentage: 20 },
+  { address: publicKey(account), percentage: 80 }
+]
+
+const rule_set = ruleSet('None')
+
 const created = await create(umi, {
   asset: assetSigner,
+  plugins:   [{
+    type: 'Royalties',
+    basisPoints: 500,
+    creators,
+    ruleSet: rule_set
+  }],
+
   collection: {
     publicKey: publicKey(collection), // why is this so hard
   },
+  
   name: `Blink MemeNFT by ${account.slice(0, 3)}...${account.slice(-3)}`,
   uri: uri,
 }).
