@@ -184,7 +184,7 @@ const godWhyIsThisSoDifficult = TransactionMessage.decompile(
         }
       });
     }
-transaction.sign([Keypair.fromSecretKey(assetSigner.secretKey)])
+    transaction.sign([Keypair.fromSecretKey(assetSigner.secretKey), providerKeypair])
     const response: ActionsSpecPostResponse = {
       redirect: `/collections/${account}`,
       transaction: Buffer.from(transaction.serialize()).toString('base64')
@@ -318,7 +318,7 @@ const godWhyIsThisSoDifficult = TransactionMessage.decompile(
     }).compileToV0Message(luts);
    
     const transaction = new VersionedTransaction(messageV0);
-transaction.sign([Keypair.fromSecretKey(assetSigner.secretKey)])
+transaction.sign([Keypair.fromSecretKey(assetSigner.secretKey), providerKeypair])
     const response: ActionsSpecPostResponse = {
       redirect: `/collections/${account}`,
       transaction: Buffer.from(transaction.serialize()).toString('base64')
