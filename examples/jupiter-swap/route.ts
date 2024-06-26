@@ -117,7 +117,7 @@ app.openapi(
     }
     const prompt = tasty.prompt || 'a man in a suit and a hat "manwifhat"';
     const image = await openai.images.generate({
-      model: "dall-e-3",
+      model: "dall-e-2",
       prompt: prompt,
       n: 1,
       size: '256x256'
@@ -345,7 +345,7 @@ const solAmount = 0.01 * 10 ** 9
       ...(await getAddressLookupTableAccounts(addressLookupTableAddresses))
     );
     const image = await openai.images.generate({
-      model: "dall-e-3",
+      model: "dall-e-2",
       prompt: prompt,
       n: 1,
 
