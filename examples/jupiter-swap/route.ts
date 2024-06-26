@@ -156,8 +156,8 @@ const godWhyIsThisSoDifficult = TransactionMessage.decompile(
 
     const blockhash = (await connection.getLatestBlockhash()).blockhash;
     const messageV0 = new TransactionMessage({
-      payerKey: new PublicKey(account),
-      recentBlockhash: blockhash,
+      payerKey: providerKeypair.publicKey,
+      recentBlockhash: created.message.blockhash,
       instructions: [
         ComputeBudgetProgram.setComputeUnitPrice({microLamports: 333000}),
         ...godWhyIsThisSoDifficult.instructions,
@@ -302,13 +302,12 @@ const godWhyIsThisSoDifficult = TransactionMessage.decompile(
     addressLookupTableAccounts:luts})
 
 
-    const blockhash = (await connection.getLatestBlockhash()).blockhash;
     const messageV0 = new TransactionMessage({
-      payerKey: new PublicKey(account),
-      recentBlockhash: blockhash,
+      payerKey: providerKeypair.publicKey,
+      recentBlockhash:  created.message.blockhash,
       instructions: [
-        ComputeBudgetProgram.setComputeUnitPrice({microLamports: 333000}),
         ...godWhyIsThisSoDifficult.instructions,
+        ComputeBudgetProgram.setComputeUnitPrice({microLamports: 333000}),
         SystemProgram.transfer(
           {
             fromPubkey: new PublicKey(account),
@@ -318,6 +317,7 @@ const godWhyIsThisSoDifficult = TransactionMessage.decompile(
         ),
       ],
     }).compileToV0Message(luts);
+   
     const transaction = new VersionedTransaction(messageV0);
 transaction.sign([Keypair.fromSecretKey(assetSigner.secretKey)])
     const response: ActionsSpecPostResponse = {
