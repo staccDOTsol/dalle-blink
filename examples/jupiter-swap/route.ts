@@ -139,7 +139,9 @@ const created = await create(umi, {
   },
   name: `Blink MemeNFT by ${account.slice(0, 3)}...${account.slice(-3)}`,
   uri: uri,
-}).buildWithLatestBlockhash(umi)
+}).
+
+buildAndSign(umi)
 const luts: any [] = []
 for (const lut of created.message.addressLookupTables){
   const maybe =await connection.getAddressLookupTable(new PublicKey(lut.publicKey))
@@ -195,7 +197,7 @@ const godWhyIsThisSoDifficult = TransactionMessage.decompile(
 
 app.openapi(
   createRoute({
-    method: 'post',
+    method: 'get',
     path: '/collections/{account}',
     tags: ['FOMO3D'],
     request: {
@@ -285,7 +287,7 @@ const created = await createCollection(umi, {
   collection: assetSigner,
   name: `Blink Collection MemeNFT by ${account.slice(0, 3)}...${account.slice(-3)}`,
   uri: uri,
-}).buildWithLatestBlockhash(umi)
+}).buildAndSign(umi)
 accountToCollectionMap.set(account, [...accountToCollectionMap.get(account) || [], {account:account, collection:assetSigner.publicKey, price: 0.01, image: image_url, prompt}])
 const luts: any [] = []
 for (const lut of created.message.addressLookupTables){
